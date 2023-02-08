@@ -10,7 +10,7 @@ allLyrics$track_name = str_trim(gsub("\\(.*\\)", "", allLyrics$track_name))
 ui = fluidPage(titlePanel(title = strong("How well do you know Taylor Swift's lyrics?"), 
                           windowTitle = "tayLyrics"),
                useShinyjs(),
-               includeCSS("www/gameStyles.css"),
+               includeCSS("www/styles.css"),
                br(),
                sidebarLayout(
                  sidebarPanel(
