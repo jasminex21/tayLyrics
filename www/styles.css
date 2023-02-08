@@ -1,0 +1,42 @@
+* {
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", 
+  Helvetica, Arial, "Lucida Grande", sans-serif !important;
+}
+
+#submit {
+  background-color: #718070 !important;
+}
+
+#hintButton {
+  background-color: #C99E6F !important;
+}
+
+#giveUpButton {
+  background-color: #C46F6F !important;
+}
+
+#button {
+  background-color: #B5B9DD !important;
+}
+
+.btn {
+  font-weight: bold;
+  border-radius: 25px !important;
+  padding: 8px 18px !important;
+  font-size: 16px !important;
+}
+
+#randGenerated, .control-label, .shiny-text-output, #guessFeedback, #printHint, #printAnswer {
+  font-size: 16px !important;
+}
+
+.form-control {
+  width: 120% !important;
+  border-radius: 20px !important;
+  height: fit-content !important;
+}
+
+.well, .selectize-input {
+  border-radius: 20px !important;
+}
+
