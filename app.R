@@ -88,28 +88,6 @@ ui = fluidPage(titlePanel(title = div(strong("How well do you know Taylor Swift'
                            br(),
                            wellPanel(htmlOutput("randGenerated")), 
                            hr(), 
-                           # here
-                           # textInput("guess",
-                           #           label = "Enter your guess",
-                           #           placeholder = "e.g. Back to December, or Shake it Off"), 
-                           # actionButton("submit",
-                           #              label = "Submit"),
-                           # actionButton("hintButton",
-                           #              label = "Hint"),
-                           # actionButton("giveUpButton",
-                           #              label = "Give up"),
-                           # br(), 
-                           # br(),
-                           # htmlOutput("guessFeedback"),
-                           # htmlOutput("printHint"), 
-                           # htmlOutput("printAnswer"), 
-                           # hr(),
-                           # wellPanel(h4(strong("Your Stats")),
-                           #           div(textOutput("totalRounds"),
-                           #               textOutput("totalCorrect"),
-                           #               textOutput("pointsProp"),
-                           #               span(style = "color: #079B7B", textOutput("totalPoints")),
-                           #               style = "font-weight: bold"))
                            fluidRow(
                              column(6,
                                     tagAppendAttributes(textInput("guess",
@@ -144,6 +122,8 @@ ui = fluidPage(titlePanel(title = div(strong("How well do you know Taylor Swift'
 
 server = function(input, output, session) {
   rounds = reactiveValues(roundValue = 0)
+  
+  hints = reactiveValues(hintsCount = 0)
   
   buttonPressed = eventReactive(input$button, {
     rounds$roundValue = rounds$roundValue + 1
@@ -189,13 +169,56 @@ server = function(input, output, session) {
   output$randGenerated = renderUI({
     HTML(paste(buttonPressed()$lyric, collapse = "<br/>"))
   })
+  
   wantHint = eventReactive(input$hintButton, {
     counter$counterValue = counter$counterValue - 1
-    shinyjs::disable("hintButton")
-    buttonPressed()$album_name[1]
+    hints$hintsCount = hints$hintsCount + 1
+    
+    df = buttonPressed()
+
+    if (hints$hintsCount == 1) {
+      hintMessage = df$album_name[1]
+    }
+    else if (hints$hintsCount == 2) {
+      # get the start index
+      firstLine = df[1,]
+      start = which((allLyrics$lyric == firstLine$lyric) &
+                      (allLyrics$line == firstLine$line) &
+                      (allLyrics$album_name == firstLine$album_name) &
+                      (allLyrics$track_name == firstLine$track_name))
+      if (firstLine$album_name != allLyrics[start,]$album_name) {
+        hintMessage = "N/A"
+      }
+      else {
+        hintMessage = allLyrics$lyric[start - 1]
+      }
+    }
+    else if (hints$hintsCount == 3) {
+      # get the ending index
+      lastLine = tail(df, n = 1)
+      end = which((allLyrics$lyric == lastLine$lyric) &
+                    (allLyrics$line == lastLine$line) &
+                    (allLyrics$album_name == lastLine$album_name) &
+                    (allLyrics$track_name == lastLine$track_name))
+      
+      if (lastLine$album_name != allLyrics[end,]$album_name) {
+        hintMessage = "N/A"
+      }
+      
+      else {
+        hintMessage = allLyrics$lyric[end + 1]
+      }
+      shinyjs::disable("hintButton")
+    }
+    
+    return(hintMessage)
   })
+  
   secButtonPressed = eventReactive(input$submit, {
     req(input$guess)
+    # reset hints
+    hints$hintsCount = 0
+    
     guess = str_trim(input$guess)
     titleLength = nchar(buttonPressed()$track_name[1])
     allowedDiff = ceiling(0.33 * titleLength)
@@ -242,7 +265,7 @@ server = function(input, output, session) {
       }
       HTML(paste0(tags$span(style = "color: red;font-size:larger", strong("That is incorrect")), 
                   br(), 
-                  div("Try again, you can do it! (or if you can't, you can give up)", 
+                  div("Try again, you can do it! (otherwise, you can give up)", 
                       style = "color:white;"), 
                   br()))
     }
@@ -251,10 +274,31 @@ server = function(input, output, session) {
     secButtonPressed()
   })
   output$printHint = renderUI({
-    HTML(paste0(tags$span(style = "color:orange;", tags$strong("Hint: ")),
-                "these lyrics come from the album ", 
-                tags$em(tags$strong(wantHint())), 
-                br(), br()))
+
+    hintMessage = wantHint()
+
+    if (hints$hintsCount == 1) {
+      HTML(paste0(tags$span(style = "color:orange;", tags$strong("Hint: ")),
+                  "these lyrics come from the album ",
+                  tags$em(tags$strong(hintMessage)),
+                  br(), br()))
+    }
+
+    else if (hints$hintsCount == 2) {
+      HTML(paste0(tags$span(style = "color:orange;", tags$strong("Hint: ")),
+                  'the previous line of this song is "', 
+                  tags$em(tags$strong(hintMessage)),
+                  '"', 
+                  br(), br()))
+    }
+    
+    else if (hints$hintsCount == 3) {
+      HTML(paste0(tags$span(style = "color:orange;", tags$strong("Hint: ")),
+                  'the next line of this song is "',
+                  tags$em(tags$strong(hintMessage)), 
+                  '"',
+                  br(), br()))
+    }
   })
   wantAnswer = eventReactive(input$giveUpButton, {
     counter$counterValue = counter$counterValue - 3
