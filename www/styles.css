@@ -3,8 +3,25 @@
   Helvetica, Arial, "Lucida Grande", sans-serif !important;
 }
 
+p, ol, ul, #randGenerated, .control-label, .shiny-text-output {
+  font-size: 16px !important;
+}
+
 #submit {
   background-color: #718070 !important;
+}
+
+#randGenerated {
+  padding-left: 20px;
+}
+
+.control-label, #randGenerated {
+  font-weight: bold;
+}
+
+.randGenDiv {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
 }
 
 #hintButton {
@@ -24,10 +41,12 @@
   border-radius: 25px !important;
   padding: 8px 18px !important;
   font-size: 16px !important;
+  border: solid;
 }
 
-#randGenerated, .control-label, .shiny-text-output, #guessFeedback, #printHint, #printAnswer {
+#guessFeedback, #printHint, #printAnswer {
   font-size: 16px !important;
+  color: white;
 }
 
 .form-control {
@@ -38,5 +57,25 @@
 
 .well, .selectize-input {
   border-radius: 20px !important;
+  background-color: #E1C4E1;
 }
 
+.selectize-input {
+  font-size: 15px;
+}
+
+h1 {
+  color: white;
+}
+
+.main {
+  color: white;
+}
+
+.lyricCard {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.bslib-sidebar-layout>.sidebar {
+  background-color: rgba(255, 255, 255, 0.5);
+}
