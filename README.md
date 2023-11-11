@@ -2,21 +2,23 @@
 
 #### How well do you know Taylor Swift's lyrics? :D
 
-Not done with this project yet, but for entertainment purposes, [here](https://jasminex21.shinyapps.io/tayLyrics/) is the link to the game. 
+This is still a work in progress, but for entertainment purposes, [here](https://jasminex21.shinyapps.io/tayLyrics/) is the link to the game. 
 
 ***
 
-Ignore the horrendous stats...
+#### Here is the general layout of the app: 
 
-![image](https://user-images.githubusercontent.com/109494334/217612671-ec147958-894b-4c2d-92f7-5e3ad57c3091.png)
+![image](https://github.com/jasminex21/tayLyrics/assets/109494334/68041bd4-2627-4854-84b7-f3e20f322d1c)
+
+Instructions are provided on the left sidebar, as needed. 
 
 ***
 
 #### Some things I would like to add/update: 
-- Overall nicer aesthetics - it's looking a little weird now
 - Possibly filter out lyrics that are < 5 words in length for medium and hard mode, and also the lyrics that are simply the same word repeated over and over
-- Add more hints; maybe something like, "The song title starts with..." or "The previous line is..." 
-- Add more detailed statistics; "Your best album is... and your worst album is..."
+- Add more detailed statistics:
+  - Pie charts showing album distribution of correct and incorrect (gave up) responses
 - Streaks
 - Saving user data (your highest %, longest streak, etc.)
+- Update the lyrics dataset - remove non-Taylor's Versions who already have Taylor's Versions, and possibly add non-album singles e.g. Only the Young, Christmas Tree Farm (but potentially provide users with the option of removing them)
 
