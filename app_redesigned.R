@@ -4,7 +4,7 @@ library(stringr)
 library(stringdist)
 library(shinyjs)
 library(shinyWidgets)
-library(emo)
+library(emojifont)
 library(highcharter)
 library(mongolite)
 library(bslib)
@@ -40,54 +40,55 @@ albumTracker = tibble(
 
 allLyrics$track_name = str_trim(gsub("\\(.*\\)", "", allLyrics$track_name))
 
-ui = page_navbar(title = strong(paste0("tayLyrics")), 
+ui = page_navbar(title = strong(emojifont::emoji("sparkles"), "tayLyrics", 
+                                emojifont::emoji("sparkles")), 
                  window_title = "tayLyrics",
                  shinyjs::useShinyjs(), 
                  includeCSS("www/styles.css"),
                  tags$head(tags$script(HTML(jscode))),
-                 setBackgroundImage(src = "remember_me.jpeg"),
+                 setBackgroundImage(src = "enchanted1dulled.jpg"),
                  br(),
-                 h1(strong(paste0("Welcome to ",
-                                  "tayLyrics"))),
+                 h1(strong(class = "main-header", 
+                           emojifont::emoji("sparkles"), "Welcome to ", "tayLyrics", 
+                           emojifont::emoji("sparkles"))),
                  layout_sidebar(
+                   class = "layout", 
                    sidebar = sidebar(
-                     width = 500, 
+                     width = 600, 
                      open = "open",
-                     h3(strong("Instructions"), emo::ji("sunglasses")), 
-                     h4(strong("The aim of the game"), emo::ji("dart")), 
+                     h3(strong("Instructions"), emojifont::emoji("sunglasses")), 
+                     h4(strong("The aim of the game"), emojifont::emoji("dart")), 
                      p("This is a simple game where you will be given one or 
                        more lines of lyrics randomly extracted from Taylor 
                        Swift's discography, and your goal is to guess which song 
                        these lyrics come from."),
                      p("Lyrics range from", strong(em("debut")), " to ", 
-                       strong(em("Midnights")), ", and include all Taylor's 
-                       Version albums up to and including Speak Now 
-                       (Taylor's Version)."),
-                     h4(strong("How to play"), emo::ji("guitar")), 
+                       strong(em("Midnights")), "and include all Taylor's 
+                       Version albums up to and including,", 
+                       strong(em("Speak Now (Taylor's Version)")), "."),
+                     h4(strong("How to play"), emojifont::emoji("guitar")), 
                      p("Click the Generate button to generate your lyrics. 
-                       There are three game modes: easy, medium, or hard. 
-                       The harder the mode, the more points you earn for a 
-                       correct guess."),
+                       There are three game modes:"),
                      tags$ol(
-                       tags$li("Easy mode (+3): a whole section of a song, e.g. the 
+                       tags$li("Easy mode (3pts): a whole section of a song, e.g. the 
                                chorus or pre-chorus. These are normally several 
-                               lines long, but that isn't always the case!"),
-                       tags$li("Medium mode (+8): two lines of a song"), 
-                       tags$li("Hard mode (+10): one line of a song")
+                               lines long, but tnot always!"),
+                       tags$li("Medium mode (8pts): two lines of a song"), 
+                       tags$li("Hard mode (10pts): one line of a song")
                      ), 
-                     p(strong("IMPORTANT: disregard all parentheses!! Do not put 
+                     p(class = "important-note", 
+                     strong("IMPORTANT: disregard all parentheses!! Do not put 
                               (Taylor's Version) or (10 Minute Version) in your 
                               answers. Capitalization does ", em("not"), 
                               " matter, and neither do minor spelling errors.")),
                      p("Points are deducted from your score if you guess 
-                       incorrectly, ask for a hint, or give up. Here's the 
-                       rundown: "), 
+                       incorrectly, ask for a hint, or give up."), 
                      tags$ul(
                        tags$li("Incorrect guess (in any mode): -2 points"), 
                        tags$li("Hint: -1 point"),
                        tags$li("Giving up: -3 points")
                      ),
-                     p("And finally, hints. There are three hints available for 
+                     p("There are three hints available for 
                        each set of lyrics."), 
                      tags$ul(
                        tags$li("Hint 1: gives the album that the song is from"), 
@@ -103,6 +104,7 @@ ui = page_navbar(title = strong(paste0("tayLyrics")),
                    class = "mainPanel",
                    layout_sidebar(
                      sidebar = sidebar(
+                       width = 350,
                        position = "right", 
                        open = F, 
                        h4(strong("Game Statistics")), 
@@ -126,15 +128,17 @@ ui = page_navbar(title = strong(paste0("tayLyrics")),
                             column(4, actionButton("generateButton", 
                                          "Generate!", 
                                          class = "btn btn-sm"))),
-                     div(p(strong("What song is the following set of lyrics from?")), 
-                         style = "font-size: larger;"), 
-                     card(
-                       class = "lyricCard",
-                       full_screen = T, 
-                       height = "600px",
-                       htmlOutput("randGenerated")
-                     ), 
-                     hr(), 
+                     # div(p(strong("What song is the following set of lyrics from?")), 
+                     #     style = "font-size: larger;"), 
+                     h4(strong("What song are these lyrics from?")),
+                     # card(
+                     #   class = "lyricCard",
+                     #   full_screen = T, 
+                     #   height = "600px",
+                     #   htmlOutput("randGenerated")
+                     # ), 
+                     div(class = "randGenDiv", br(), htmlOutput("randGenerated"), br()),
+                     # hr(), 
                      tagAppendAttributes(
                        textInput("guess", 
                                  label = "Enter your guess", 
@@ -301,7 +305,7 @@ server = function(input, output, session) {
       # history$insert(addRow)
       # print(history$find())
 
-      HTML(paste(tags$span(style = "color:#2E4A33;font-size:larger;font-weight:800", 
+      HTML(paste(tags$span(style = "color:green;font-size:larger;font-weight:800", 
                            tags$strong("Correct!")),
                  br(),  
                  em(strong(buttonPressed()$track_name[1])),
@@ -410,7 +414,7 @@ server = function(input, output, session) {
   })
   output$pointsProp = renderText({
     propPerc = round((counter$counterValue / availPoints$availValue) * 100, digits = 2)
-    paste0("Points out of total possible: ", counter$counterValue, "/", availPoints$availValue, " (", propPerc, "%)")
+    paste0("Points out of possible: ", counter$counterValue, "/", availPoints$availValue, " (", propPerc, "%)")
   })
   observeEvent(input$submit, {
     shinyjs::show("guessFeedback")
