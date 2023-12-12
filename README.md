@@ -8,7 +8,8 @@ This is still a work in progress, but for entertainment purposes, [here](https:/
 
 #### Here is the general layout of the app: 
 
-![image](https://github.com/jasminex21/tayLyrics/assets/109494334/68041bd4-2627-4854-84b7-f3e20f322d1c)
+![image](https://github.com/jasminex21/tayLyrics/assets/109494334/4e5abd31-beed-463f-a62d-31cff4869fd9)
+
 
 Instructions are provided on the left sidebar, as needed. 
 
