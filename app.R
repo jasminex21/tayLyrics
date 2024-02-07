@@ -4,8 +4,11 @@ library(stringr)
 library(stringdist)
 library(shinyjs)
 library(shinyWidgets)
-library(emo)
+library(emojifont)
+library(highcharter)
+library(bslib)
 
+# JS code that allows for the enter button to trigger the submit button
 jscode <- '
 $(function() {
   var $els = $("[data-proxy-click]");
@@ -24,110 +27,146 @@ $(function() {
 });
 '
 
-allLyrics = read_csv("allTaylorLyrics.csv")
+allLyrics = read_csv("allTaylorLyrics_2024.csv")
+
+albumTracker = tibble(
+  album = character(), 
+  status = character()
+)
+
 allLyrics$track_name = str_trim(gsub("\\(.*\\)", "", allLyrics$track_name))
 
-ui = fluidPage(titlePanel(title = div(strong("How well do you know Taylor Swift's lyrics?"), 
-                                      style = "color: white;font-weight:800;"), 
-                          windowTitle = "tayLyrics"),
-               useShinyjs(),
-               includeCSS("www/styles.css"), 
-               tags$head(tags$script(HTML(jscode))),
-               setBackgroundImage(src = "enchanted1dulled.jpg"),
-               br(),
-               sidebarLayout(
-                 sidebarPanel(
-                   h3(strong(paste0("Welcome to ", emo::ji("sparkles"), 
-                                    "tayLyrics", emo::ji("sparkles")))),
-                   p("Lyrics range from debut to ", strong(em("Midnights"))),
-                   p("Ignore anything in paretheses, e.g. ", em("don't"), " use (Taylor's Version) or (10 Minute Version) in your answers. Don't worry about capitalization and minor spelling errors!"),
-                   # div(p('Click the purple button below to generate a random lyric (or set of lyrics) from Taylor Swift\'s discography, ranging from her self-titled debut album to her tenth studio album, ', strong(em("Midnights")), "."),
-                   # p("Capitalisation does not matter, and minor spelling mistakes/punctuation differences are ignored. Do not include anything in parentheses, e.g. (Taylor's Version) or (10 Minute Version)."), style = "font-size: 16px;"),
-                   hr(), 
-                   h4(strong("Generate your random lyric")),
-                   selectInput("mode", 
-                               label = "Select game mode", 
-                               choices = c("Easy mode (an entire section; # of lines varies)" = 1, 
-                                           "Medium mode (2 lines)" = 2, 
-                                           "Hard mode (1 line)" = 3), 
-                               selected = 1), 
-                   actionButton("button", 
-                                label = "Generate!"), 
-                   hr(), 
-                   # h4(strong("Directions:")), 
-                   # div(p(strong("Modes:")), 
-                   # tags$ol(
-                   #   tags$li("Easy mode: generates an entire section of a track, e.g., the bridge, or the chorus"), 
-                   #   tags$li("Medium mode: generates two lines from a track, from the same section"), 
-                   #   tags$li("Hard mode: generates a single line from a track")
-                   # ), 
-                   # p(strong("Submitting, Hints and Giving Up:")),
-                   # tags$ul(
-                   #   tags$li('If you have a guess, press the green ', 
-                   #           tags$span(style = "color: green", strong('"Submit"')), 
-                   #           "button"),
-                   #   tags$li('If the correct guess is at the tip of your tongue and you just need a little nudge, the orange ', tags$span(style = "color: orange", strong('"Hint"')), "button will give you the album the track is from"), 
-                   #   tags$li('If you have absolutely no clue what the answer is, press the red ', 
-                   #           tags$span(style = "color: red", strong('"Give Up"')), "button to reveal the answer and start a new round")
-                   # ),
-                   p(strong("Points:")), 
-                   tags$ul(
-                     tags$li("Correct guess in easy mode = +3 points"), 
-                     tags$li("Correct guess in medium mode = +8 points"), 
-                     tags$li("Correct guess in hard mode = +10 points"),
-                     tags$li("Incorrect guess in any mode = -2 points"),
-                     tags$li("Hint = -1 point"), 
-                     tags$li("Give up = -3 points")
-                   )
+ui = page_navbar(title = strong(emojifont::emoji("sparkles"), "tayLyrics", 
+                                emojifont::emoji("sparkles")), 
+                 window_title = "tayLyrics",
+                 shinyjs::useShinyjs(), 
+                 includeCSS("www/styles.css"),
+                 tags$head(tags$script(HTML(jscode))),
+                 setBackgroundImage(src = "enchanted1dulled.jpg"),
+                 br(),
+                 h1(strong(class = "main-header", 
+                           emojifont::emoji("sparkles"), "Welcome to ", "tayLyrics", 
+                           emojifont::emoji("sparkles"))),
+                 layout_sidebar(
+                   class = "layout", 
+                   sidebar = sidebar(
+                     width = 600, 
+                     open = "open",
+                     h3(strong("Instructions"), emojifont::emoji("sunglasses")), 
+                     h4(strong("The aim of the game"), emojifont::emoji("dart")), 
+                     p("This is a simple game where you will be given one or 
+                       more lines of lyrics randomly extracted from Taylor 
+                       Swift's discography, and your goal is to guess which song 
+                       these lyrics come from."),
+                     p("Lyrics range from", strong(em("debut")), " to ", 
+                       strong(em("Midnights")), "and include all Taylor's 
+                       Version albums up to and including,", 
+                       strong(em("1989 (Taylor's Version)")), "."),
+                     h4(strong("How to play"), emojifont::emoji("guitar")), 
+                     p("Click the Generate button to generate your lyrics. 
+                       There are three game modes:"),
+                     tags$ol(
+                       tags$li("Easy mode (3pts): a whole section of a song, e.g. the 
+                               chorus or pre-chorus. These are normally several 
+                               lines long, but tnot always!"),
+                       tags$li("Medium mode (8pts): two lines of a song"), 
+                       tags$li("Hard mode (10pts): one line of a song")
+                     ), 
+                     p(class = "important-note", 
+                     strong("IMPORTANT: disregard all parentheses!! Do not put 
+                              (Taylor's Version) or (10 Minute Version) in your 
+                              answers. Capitalization does ", em("not"), 
+                              " matter, and neither do minor spelling errors.")),
+                     p("Points are deducted from your score if you guess 
+                       incorrectly, ask for a hint, or give up."), 
+                     tags$ul(
+                       tags$li("Incorrect guess (in any mode): -2 points"), 
+                       tags$li("Hint: -1 point"),
+                       tags$li("Giving up: -3 points")
+                     ),
+                     p("There are three hints available for 
+                       each set of lyrics."), 
+                     tags$ul(
+                       tags$li("Hint 1: gives the album that the song is from"), 
+                       tags$li("Hint 2: gives the line immediately preceding the 
+                               given set of lyrics"), 
+                       tags$li("Hint 3: gives the line immediately after the 
+                               given set of lyrics")
+                     ), 
+                     p(strong("That's it! Have fun!"))
+                   ), 
                    
-                 ), 
-                 mainPanel(width = 7, 
-                           br(),
-                           div(h3(strong("What song is the following (set of) lyrics from?")), 
-                               style = "color: white;"),
-                           br(),
-                           wellPanel(htmlOutput("randGenerated")), 
-                           hr(), 
-                           fluidRow(
-                             column(6,
-                                    tagAppendAttributes(textInput("guess",
-                                              label = div("Enter your guess", 
-                                                          style = "color: white;"),
-                                              placeholder = "e.g. Back to December, or Shake it Off"), 
-                                              `data-proxy-click` = "submit"),
-                                    actionButton("submit",
-                                                 label = "Submit"),
-                                    actionButton("hintButton",
-                                                 label = "Hint"),
-                                    actionButton("giveUpButton",
-                                                 label = "Give up"),
-                                    br(),
-                                    br(),
-                                    htmlOutput("guessFeedback"),
-                                    htmlOutput("printHint"),
-                                    htmlOutput("printAnswer"),
-                                    br(),
-                                    br()),
-                             column(6,
-                                    wellPanel(h4(strong("Your Stats")),
-                                              div(textOutput("totalRounds"),
-                                              textOutput("totalCorrect"),
-                                              textOutput("pointsProp"),
-                                              span(style = "color: #079B7B", textOutput("totalPoints")), style = "font-weight: bold"))))
-                           ) 
+                   # the main panel where all the guessing goes on
+                   class = "mainPanel",
+                   layout_sidebar(
+                     sidebar = sidebar(
+                       width = 350,
+                       position = "right", 
+                       open = T, 
+                       h4(strong("Game Statistics")), 
+                       div(
+                         textOutput("totalRounds"), 
+                         textOutput("totalCorrect"), 
+                         textOutput("pointsProp"), 
+                         span(style = "color: #079B7B", textOutput("totalPoints")), 
+                         style = "font-weight: bold"
+                       ),
+                       # highchartOutput("correctPie")
 
-               )
-               
+                     ), 
+                     column(12, 
+                            column(8, selectInput("mode", 
+                                        label = "Select game mode", 
+                                        choices = c("Easy mode (entire section)" = 1, 
+                                                    "Medium mode (2 lines)" = 2, 
+                                                    "Hard mode (1 line)" = 3), 
+                                        selected = 1)), 
+                            column(4, actionButton("generateButton", 
+                                         "Generate!", 
+                                         class = "btn btn-sm"))),
+                     # div(p(strong("What song is the following set of lyrics from?")), 
+                     #     style = "font-size: larger;"), 
+                     h4(strong("What song are these lyrics from?")),
+                     # card(
+                     #   class = "lyricCard",
+                     #   full_screen = T, 
+                     #   height = "600px",
+                     #   htmlOutput("randGenerated")
+                     # ), 
+                     div(class = "randGenDiv", br(), htmlOutput("randGenerated"), br()),
+                     # hr(), 
+                     tagAppendAttributes(
+                       textInput("guess", 
+                                 label = "Enter your guess", 
+                                 placeholder = "e.g. Back to December, or Shake it Off"), 
+                       `data-proxy-click` = "submit"), 
+                     column(12, 
+                            actionButton("submit",
+                                         label = "Submit"),
+                            actionButton("hintButton",
+                                         label = "Hint"),
+                            actionButton("giveUpButton",
+                                         label = "Give up"), 
+                            br(), br(),
+                            htmlOutput("guessFeedback"),
+                            htmlOutput("printHint"),
+                            htmlOutput("printAnswer"),
+                     )
+                   ),
+                   
+                 )
+  
 )
 
 server = function(input, output, session) {
   rounds = reactiveValues(roundValue = 0)
   
   hints = reactiveValues(hintsCount = 0)
+  # history$drop()
   
-  buttonPressed = eventReactive(input$button, {
+  buttonPressed = eventReactive(input$generateButton, {
     rounds$roundValue = rounds$roundValue + 1
-    shinyjs::disable("button")
+    shinyjs::disable("generateButton")
     shinyjs::enable("hintButton")
     shinyjs::enable("submit")
     shinyjs::enable("giveUpButton")
@@ -149,7 +188,7 @@ server = function(input, output, session) {
     }
     else if (input$mode == 1) {
       randSection = allLyrics$element[randNum]
-
+      
       end = randNum
       while (allLyrics$element[end + 1] == randSection) {
         end = end + 1
@@ -175,7 +214,7 @@ server = function(input, output, session) {
     hints$hintsCount = hints$hintsCount + 1
     
     df = buttonPressed()
-
+    
     if (hints$hintsCount == 1) {
       hintMessage = df$album_name[1]
     }
@@ -217,7 +256,7 @@ server = function(input, output, session) {
   secButtonPressed = eventReactive(input$submit, {
     req(input$guess)
     # reset hints
-    hints$hintsCount = 0
+    # hints$hintsCount = 0
     
     guess = str_trim(input$guess)
     titleLength = nchar(buttonPressed()$track_name[1])
@@ -225,7 +264,9 @@ server = function(input, output, session) {
     if (stringdist(str_to_lower(buttonPressed()$track_name[1]), 
                    str_to_lower(guess)) <= allowedDiff) {
       corrects$correctsValue = corrects$correctsValue + 1
-      shinyjs::enable("button")
+      # reset hints
+      hints$hintsCount = 0
+      shinyjs::enable("generateButton")
       shinyjs::disable("giveUpButton")
       shinyjs::disable("hintButton")
       shinyjs::reset("guess")
@@ -242,15 +283,35 @@ server = function(input, output, session) {
         counter$counterValue = counter$counterValue + 8
         availPoints$availValue = availPoints$availValue + 8
       }
-      HTML(paste(tags$span(style = "color:#70FF23;font-size:larger;font-weight:800", 
-                            tags$strong("Correct!")),
-                  br(),  
-                  em(strong(buttonPressed()$track_name[1])),
-                     ", ", 
-                     strong(em(buttonPressed()$element[1])),
-                  ", from the album ", 
-                  em(strong(buttonPressed()$album_name[1])), 
-                  br(), br(), sep = ""))
+      
+      # add status to tibble (lyrics answered correctly)
+      # addRow = tibble(
+      #   album = buttonPressed()$album_name[1], 
+      #   status = "Correct"
+      # )
+      # 
+      # albumTracker = albumTracker %>%
+      #   add_row(addRow)
+      # print("correct")
+      # print(albumTracker)
+      addRow = data.frame(
+        album = buttonPressed()$album_name[1], 
+        status = "Correct"
+      )
+      # history$insert(addRow)
+      # print(history$find())
+
+      HTML(paste(tags$span(style = "color:green;font-size:larger;font-weight:800", 
+                           tags$strong("Correct!")),
+                 br(),  
+                 em(strong(buttonPressed()$track_name[1])),
+                 ", ", 
+                 strong(em(buttonPressed()$element[1])),
+                 ", from the album ", 
+                 em(strong(buttonPressed()$album_name[1])), 
+                 br(), br(), sep = ""), 
+           .noWS = "outside")
+      
     }
     else {
       counter$counterValue = counter$counterValue - 2
@@ -267,23 +328,24 @@ server = function(input, output, session) {
                   br(), 
                   div("Try again, you can do it! (otherwise, you can give up)", 
                       style = "color:white;"), 
-                  br()))
+                  br()), 
+           .noWS = "outside")
     }
   })
   output$guessFeedback = renderUI({
     secButtonPressed()
   })
   output$printHint = renderUI({
-
+    
     hintMessage = wantHint()
-
+    
     if (hints$hintsCount == 1) {
       HTML(paste0(tags$span(style = "color:orange;", tags$strong("Hint: ")),
                   "these lyrics come from the album ",
                   tags$em(tags$strong(hintMessage)),
                   br(), br()))
     }
-
+    
     else if (hints$hintsCount == 2) {
       HTML(paste0(tags$span(style = "color:orange;", tags$strong("Hint: ")),
                   'the previous line of this song is "', 
@@ -303,10 +365,27 @@ server = function(input, output, session) {
   wantAnswer = eventReactive(input$giveUpButton, {
     counter$counterValue = counter$counterValue - 3
     shinyjs::disable("submit")
-    shinyjs::enable("button")
+    shinyjs::enable("generateButton")
     shinyjs::disable("giveUpButton")
     shinyjs::disable("hintButton")
     shinyjs::reset("guess")
+    # reset hints
+    hints$hintsCount = 0
+    
+    # addRow = tibble(
+    #   album = buttonPressed()$album_name[1], 
+    #   status = "Gave up"
+    # )
+    # albumTracker = albumTracker %>%
+    #   add_row(addRow)
+    # print(albumTracker)
+    
+    addRow = data.frame(
+      album = buttonPressed()$album_name[1], 
+      status = "Gave up"
+    )
+    # history$insert(addRow)
+    
     buttonPressed()$track_name[1]
   })
   output$printAnswer = renderUI({
@@ -331,12 +410,12 @@ server = function(input, output, session) {
   })
   output$pointsProp = renderText({
     propPerc = round((counter$counterValue / availPoints$availValue) * 100, digits = 2)
-    paste0("Points out of total possible: ", counter$counterValue, "/", availPoints$availValue, " (", propPerc, "%)")
+    paste0("Points out of possible: ", counter$counterValue, "/", availPoints$availValue, " (", propPerc, "%)")
   })
   observeEvent(input$submit, {
     shinyjs::show("guessFeedback")
   })
-  observeEvent(input$button, {
+  observeEvent(input$generateButton, {
     shinyjs::hide("guessFeedback")
     shinyjs::hide("printHint")
     shinyjs::hide("printAnswer")
@@ -347,9 +426,60 @@ server = function(input, output, session) {
   observeEvent(input$giveUpButton, {
     shinyjs::show("printAnswer")
   })
-  # observeEvent(input$guess, {
-  #   shinyjs::enable("submit")
-  # })
+  
+  correctData = reactive({
+    if (nrow(history$find()) > 0) {
+      history$find() %>% 
+        filter(status == "Correct") %>%
+        group_by(album) %>%
+        count()
+    }
+    else {
+      tibble(
+        album = character(), 
+        n = integer()
+      )
+    }
+  })
+  
+  output$correctPie = renderHighchart({
+    # pie_chart = hchart(correctData(), "pie", hcaes(x = album, y = n)) %>%
+    #   hc_title(text = "Album Lyrics Answered Correctly")
+    # print(correctData())
+    # highchart() |> 
+    #   hc_chart(type = "pie") |> 
+    #   hc_add_series(data = correctData()) |>
+    #   hc_title(text = "Correct Answers") |>
+    #   hc_plotOptions(pie = list(
+    #     dataLabels = list(
+    #       enabled = TRUE
+    #     )
+    #   ))
+    
+    if (!is.null(correctData())) {
+      data = correctData()
+      
+    }
+    else {
+      data = tibble()
+      # data = tibble(
+      #   album = character(0), 
+      #   n = numeric(0)
+      # )
+    }
+    print(data)
+    
+    data %>%
+      hchart("pie", hcaes(x = album, y = n)) %>%
+      hc_title(text = "Your Correct Answers") %>%
+      hc_plotOptions(pie = list(
+        dataLabels = list(
+          enabled = T
+        )
+      ))
+    
+  })
+
 }
 
 shinyApp(ui = ui, server = server)
