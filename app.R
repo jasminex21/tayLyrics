@@ -52,26 +52,12 @@ ui = page_navbar(title = strong(emojifont::emoji("sparkles"), "tayLyrics",
                    sidebar = sidebar(
                      width = 600, 
                      open = "open",
-                     h3(strong("Instructions"), emojifont::emoji("sunglasses")), 
-                     h4(strong("The aim of the game"), emojifont::emoji("dart")), 
-                     p("This is a simple game where you will be given one or 
-                       more lines of lyrics randomly extracted from Taylor 
-                       Swift's discography, and your goal is to guess which song 
-                       these lyrics come from."),
                      p("Lyrics range from", strong(em("debut")), " to ", 
                        strong(em("Midnights")), "and include all Taylor's 
                        Version albums up to and including,", 
                        strong(em("1989 (Taylor's Version)")), "."),
                      h4(strong("How to play"), emojifont::emoji("guitar")), 
-                     p("Click the Generate button to generate your lyrics. 
-                       There are three game modes:"),
-                     tags$ol(
-                       tags$li("Easy mode (3pts): a whole section of a song, e.g. the 
-                               chorus or pre-chorus. These are normally several 
-                               lines long, but tnot always!"),
-                       tags$li("Medium mode (8pts): two lines of a song"), 
-                       tags$li("Hard mode (10pts): one line of a song")
-                     ), 
+                     p("Choose your game mode, then click the Generate button to generate your lyrics."),
                      p(class = "important-note", 
                      strong("IMPORTANT: disregard all parentheses!! Do not put 
                               (Taylor's Version) or (10 Minute Version) in your 
@@ -117,7 +103,7 @@ ui = page_navbar(title = strong(emojifont::emoji("sparkles"), "tayLyrics",
                      column(12, 
                             column(8, selectInput("mode", 
                                         label = "Select game mode", 
-                                        choices = c("Easy mode (entire section)" = 1, 
+                                        choices = c("Easy mode (entire section, e.g. chorus)" = 1, 
                                                     "Medium mode (2 lines)" = 2, 
                                                     "Hard mode (1 line)" = 3), 
                                         selected = 1)), 
