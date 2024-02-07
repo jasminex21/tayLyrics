@@ -16,11 +16,12 @@ Instructions are provided on the left sidebar, as needed.
 
 ***
 
-#### Some things I would like to add/update: 
+#### TODO: 
 - Possibly filter out lyrics that are < 5 words in length for medium and hard mode, and also the lyrics that are simply the same word repeated over and over
 - Add more detailed statistics:
   - Pie charts showing album distribution of correct and incorrect (gave up) responses
-- Streaks
 - Saving user data (your highest %, longest streak, etc.)
-- Update the lyrics dataset - remove non-Taylor's Versions who already have Taylor's Versions, and possibly add non-album singles e.g. Only the Young, Christmas Tree Farm (but potentially provide users with the option of removing them)
+  - Streaks in general would be cool
+- Possibly add non-album singles e.g. Only the Young, Christmas Tree Farm (but provide users with the option of removing them)
+- I could have seen wrong but there might be an issue with the previous/next lyric hint where the lyric came from an entirely different song? Maybe I imagined this.
 
