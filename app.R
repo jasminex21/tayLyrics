@@ -100,16 +100,20 @@ ui = page_navbar(title = strong(emojifont::emoji("sparkles"), "tayLyrics",
                        # highchartOutput("correctPie")
 
                      ), 
-                     column(12, 
+                     fluidRow( 
                             column(8, selectInput("mode", 
                                         label = "Select game mode", 
                                         choices = c("Easy mode (entire section, e.g. chorus)" = 1, 
                                                     "Medium mode (2 lines)" = 2, 
                                                     "Hard mode (1 line)" = 3), 
                                         selected = 1)), 
-                            column(4, actionButton("generateButton", 
-                                         "Generate!", 
-                                         class = "btn btn-sm"))),
+                            # column(3, textInput("seed", 
+                            #                     label = "Set seed (optional)", 
+                            #                     placeholder = "e.g. 21")), 
+                            column(4)),
+                     column(4, actionButton("generateButton", 
+                                            "Generate!", 
+                                            class = "btn btn-sm")),
                      # div(p(strong("What song is the following set of lyrics from?")), 
                      #     style = "font-size: larger;"), 
                      h4(strong("What song are these lyrics from?")),
@@ -145,6 +149,10 @@ ui = page_navbar(title = strong(emojifont::emoji("sparkles"), "tayLyrics",
 )
 
 server = function(input, output, session) {
+  
+  # setting a different seed each time the game is reloaded
+  set.seed(round(as.numeric(Sys.time())))
+  
   rounds = reactiveValues(roundValue = 0)
   
   hints = reactiveValues(hintsCount = 0)
