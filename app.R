@@ -310,7 +310,7 @@ server = function(input, output, session) {
       else {
         availPoints$availValue = availPoints$availValue + 8
       }
-      HTML(paste0(tags$span(style = "color: red;font-size:larger", strong("That is incorrect")), 
+      HTML(paste0(tags$span(style = "color: red;font-size:larger", '"', input$guess, '"', strong(" is incorrect")), 
                   br(), 
                   div("Try again, you can do it! (otherwise, you can give up)", 
                       style = "color:white;"), 
