@@ -24,4 +24,5 @@ Instructions are provided on the left sidebar, as needed.
   - Streaks in general would be cool
 - Possibly add non-album singles e.g. Only the Young, Christmas Tree Farm (but provide users with the option of removing them)
 - I could have seen wrong but there might be an issue with the previous/next lyric hint where the lyric came from an entirely different song? Maybe I imagined this.
+- Add option to set seed for the randomizer - but might need to have an info button for it for an explanation of what it does 
 
