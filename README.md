@@ -17,6 +17,7 @@ Instructions are provided on the left sidebar, as needed.
 ***
 
 #### TODO: 
+- Address first: get the hints to show up on top of each other instead of Hint 2 obscuring Hint 1
 - Possibly filter out lyrics that are < 5 words in length for medium and hard mode, and also the lyrics that are simply the same word repeated over and over
 - Add more detailed statistics:
   - Pie charts showing album distribution of correct and incorrect (gave up) responses
