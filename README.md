@@ -18,6 +18,8 @@ Instructions are provided on the left sidebar, as needed.
 
 #### TODO: 
 - Address first: get the hints to show up on top of each other instead of Hint 2 obscuring Hint 1
+- Add an option to elect which albums you want to guess from, i.e. maybe you're terrible at debut so you'd prefer it not be in the game. Should be a bunch of checkmarks who are by default all checked, and you can deselect them if you want.
+- Make the 2nd hint the line after instead of line before
 - Possibly filter out lyrics that are < 5 words in length for medium and hard mode, and also the lyrics that are simply the same word repeated over and over
 - Add more detailed statistics:
   - Pie charts showing album distribution of correct and incorrect (gave up) responses
