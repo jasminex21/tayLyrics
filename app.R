@@ -7,6 +7,7 @@ library(shinyWidgets)
 library(emojifont)
 library(highcharter)
 library(bslib)
+library(shinyalert)
 
 # JS code that allows for the enter button to trigger the submit button
 jscode <- '
@@ -28,6 +29,19 @@ $(function() {
 '
 
 allLyrics = read_csv("allTaylorLyrics_2024.csv")
+
+allAlbums = c(
+  "Taylor Swift", 
+  "Fearless (Taylor's Version)",
+  "Speak Now (Taylor's Version)", 
+  "Red (Taylor's Version)", 
+  "1989 (Taylor's Version)", 
+  "reputation", 
+  "Lover", 
+  "folklore", 
+  "evermore", 
+  "Midnights"
+)
 
 albumTracker = tibble(
   album = character(), 
@@ -59,7 +73,7 @@ ui = page_navbar(title = strong(emojifont::emoji("sparkles"), "tayLyrics",
                      h4(strong("How to play"), emojifont::emoji("guitar")), 
                      p("Choose your game mode, then click the Generate button to generate your lyrics."),
                      p(class = "important-note", 
-                     strong("IMPORTANT: disregard all parentheses!! Do not put 
+                       strong("IMPORTANT: disregard all parentheses!! Do not put 
                               (Taylor's Version) or (10 Minute Version) in your 
                               answers. Capitalization does ", em("not"), 
                               " matter, and neither do minor spelling errors.")),
@@ -98,24 +112,32 @@ ui = page_navbar(title = strong(emojifont::emoji("sparkles"), "tayLyrics",
                          style = "font-weight: bold"
                        ),
                        # highchartOutput("correctPie")
-
+                       
                      ), 
+                     
                      fluidRow( 
-                            column(8, selectInput("mode", 
-                                        label = "Select game mode", 
-                                        choices = c("Easy mode (entire section, e.g. chorus)" = 1, 
-                                                    "Medium mode (2 lines)" = 2, 
-                                                    "Hard mode (1 line)" = 3), 
-                                        selected = 1)), 
-                            # column(3, textInput("seed", 
-                            #                     label = "Set seed (optional)", 
-                            #                     placeholder = "e.g. 21")), 
-                            column(4)),
+                       column(8, selectInput("mode", 
+                                             label = "Select game mode", 
+                                             choices = c("Easy mode (entire section, e.g. chorus)" = 1, 
+                                                         "Medium mode (2 lines)" = 2, 
+                                                         "Hard mode (1 line)" = 3), 
+                                             selected = 1)), 
+                       # column(3, textInput("seed", 
+                       #                     label = "Set seed (optional)", 
+                       #                     placeholder = "e.g. 21")), 
+                       column(4)),
+                     fluidRow(
+                       checkboxGroupInput(
+                         "albums", 
+                         label = "Generate lyrics from: ",
+                         choices = allAlbums,
+                         selected = allAlbums, 
+                         inline = T, 
+                         width = "100%"
+                       )),
                      column(4, actionButton("generateButton", 
                                             "Generate!", 
                                             class = "btn btn-sm")),
-                     # div(p(strong("What song is the following set of lyrics from?")), 
-                     #     style = "font-size: larger;"), 
                      h4(strong("What song are these lyrics from?")),
                      # card(
                      #   class = "lyricCard",
@@ -145,7 +167,7 @@ ui = page_navbar(title = strong(emojifont::emoji("sparkles"), "tayLyrics",
                    ),
                    
                  )
-  
+                 
 )
 
 server = function(input, output, session) {
@@ -159,40 +181,56 @@ server = function(input, output, session) {
   # history$drop()
   
   buttonPressed = eventReactive(input$generateButton, {
-    rounds$roundValue = rounds$roundValue + 1
     shinyjs::disable("generateButton")
     shinyjs::enable("hintButton")
     shinyjs::enable("submit")
     shinyjs::enable("giveUpButton")
-    randNum = floor(runif(1, min = 1, max = nrow(allLyrics)))
-    if (input$mode == 3) {
-      allLyrics[randNum,]
+    
+    # keeping only the selected albums
+    allLyrics = allLyrics %>%
+      filter(album_name %in% input$albums)
+    
+    if (nrow(allLyrics) == 0) {
+      shinyalert("At least one album must be selected. Please try again!")
+      shinyjs::disable("submit")
+      shinyjs::disable("giveUpButton")
+      shinyjs::disable("hint")
+      shinyjs::enable("generateButton")
+      NULL
     }
-    else if (input$mode == 2) {
-      randSection = allLyrics$element[randNum]
-      if (allLyrics$element[randNum + 1] == randSection) {
-        start = randNum
-        end = randNum + 1
-      }
-      else {
-        start = randNum - 1
-        end = randNum
-      }
-      allLyrics[start:end,]
-    }
-    else if (input$mode == 1) {
-      randSection = allLyrics$element[randNum]
+    
+    else {
+      rounds$roundValue = rounds$roundValue + 1
+      randNum = floor(runif(1, min = 1, max = nrow(allLyrics)))
       
-      end = randNum
-      while (allLyrics$element[end + 1] == randSection) {
-        end = end + 1
+      if (input$mode == 3) {
+        allLyrics[randNum,]
       }
-      start = randNum
-      while (allLyrics$element[start - 1] == randSection) {
-        start = start - 1
+      else if (input$mode == 2) {
+        randSection = allLyrics$element[randNum]
+        if (allLyrics$element[randNum + 1] == randSection) {
+          start = randNum
+          end = randNum + 1
+        }
+        else {
+          start = randNum - 1
+          end = randNum
+        }
+        allLyrics[start:end,]
       }
-      allLyrics[start:end,]
-    }
+      else if (input$mode == 1) {
+        randSection = allLyrics$element[randNum]
+        
+        end = randNum
+        while (allLyrics$element[end + 1] == randSection) {
+          end = end + 1
+        }
+        start = randNum
+        while (allLyrics$element[start - 1] == randSection) {
+          start = start - 1
+        }
+        allLyrics[start:end,]
+      }}
   })
   
   counter = reactiveValues(counterValue = 0)
@@ -219,7 +257,7 @@ server = function(input, output, session) {
                       (allLyrics$line == firstLine$line) &
                       (allLyrics$album_name == firstLine$album_name) &
                       (allLyrics$track_name == firstLine$track_name))
-      if (firstLine$album_name != allLyrics[start,]$album_name) {
+      if (firstLine$track_name != allLyrics[start,]$track_name) {
         hintMessage = "N/A"
       }
       else {
@@ -234,7 +272,7 @@ server = function(input, output, session) {
                     (allLyrics$album_name == lastLine$album_name) &
                     (allLyrics$track_name == lastLine$track_name))
       
-      if (lastLine$album_name != allLyrics[end,]$album_name) {
+      if (lastLine$track_name != allLyrics[end,]$track_name) {
         hintMessage = "N/A"
       }
       
@@ -294,7 +332,7 @@ server = function(input, output, session) {
       )
       # history$insert(addRow)
       # print(history$find())
-
+      
       HTML(paste(tags$span(style = "color:green;font-size:larger;font-weight:800", 
                            tags$strong("Correct!")),
                  br(),  
@@ -473,7 +511,7 @@ server = function(input, output, session) {
       ))
     
   })
-
+  
 }
 
 shinyApp(ui = ui, server = server)
