@@ -250,21 +250,8 @@ server = function(input, output, session) {
     if (hints$hintsCount == 1) {
       hintMessage = df$album_name[1]
     }
+    # give the NEXT line
     else if (hints$hintsCount == 2) {
-      # get the start index
-      firstLine = df[1,]
-      start = which((allLyrics$lyric == firstLine$lyric) &
-                      (allLyrics$line == firstLine$line) &
-                      (allLyrics$album_name == firstLine$album_name) &
-                      (allLyrics$track_name == firstLine$track_name))
-      if (firstLine$track_name != allLyrics[start,]$track_name) {
-        hintMessage = "N/A"
-      }
-      else {
-        hintMessage = allLyrics$lyric[start - 1]
-      }
-    }
-    else if (hints$hintsCount == 3) {
       # get the ending index
       lastLine = tail(df, n = 1)
       end = which((allLyrics$lyric == lastLine$lyric) &
@@ -279,6 +266,23 @@ server = function(input, output, session) {
       else {
         hintMessage = allLyrics$lyric[end + 1]
       }
+    }
+    # give the PREVIOUS line
+    else if (hints$hintsCount == 3) {
+      
+      # get the start index
+      firstLine = df[1,]
+      start = which((allLyrics$lyric == firstLine$lyric) &
+                      (allLyrics$line == firstLine$line) &
+                      (allLyrics$album_name == firstLine$album_name) &
+                      (allLyrics$track_name == firstLine$track_name))
+      if (firstLine$track_name != allLyrics[start,]$track_name) {
+        hintMessage = "N/A"
+      }
+      else {
+        hintMessage = allLyrics$lyric[start - 1]
+      }
+      
       shinyjs::disable("hintButton")
     }
     
@@ -380,7 +384,7 @@ server = function(input, output, session) {
     
     else if (hints$hintsCount == 2) {
       HTML(paste0(tags$span(style = "color:orange;", tags$strong("Hint: ")),
-                  'the previous line of this song is "', 
+                  'the next line of this song is "', 
                   tags$em(tags$strong(hintMessage)),
                   '"', 
                   br(), br()))
@@ -388,7 +392,7 @@ server = function(input, output, session) {
     
     else if (hints$hintsCount == 3) {
       HTML(paste0(tags$span(style = "color:orange;", tags$strong("Hint: ")),
-                  'the next line of this song is "',
+                  'the previous line of this song is "',
                   tags$em(tags$strong(hintMessage)), 
                   '"',
                   br(), br()))
