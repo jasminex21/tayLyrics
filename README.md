@@ -16,6 +16,21 @@ Instructions are provided on the left sidebar, as needed.
 
 ***
 
+#### Points breakdown:
+*Subject to change*
+
+Additions: 
+- Correct guess in easy mode: +1pt
+- Correct guess in medium mode: +6pts
+- Correct guess in hard mode: +8pts
+
+Deductions: 
+- Hint: -1pt per hint
+- Incorrect guess in any mode: -2pts
+- Giving up: -3pts (change this to -2pts)
+
+***
+
 #### TODO: 
 - Address first: get the hints to show up on top of each other instead of Hint 2 obscuring Hint 1
 - Fix the points system - it's a little too arbitrary right now. Penalizes too much as well.
