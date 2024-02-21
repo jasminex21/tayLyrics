@@ -35,8 +35,8 @@ Deductions:
 - Address first: get the hints to show up on top of each other instead of Hint 2 obscuring Hint 1
 - Fix the points system - it's a little too arbitrary right now. Penalizes too much as well.
   - Points breakdown in the instructions panel 
-- Make the 2nd hint the line after instead of line before
 - Possibly filter out lyrics that are < 5 words in length for medium and hard mode, and also the lyrics that are simply the same word repeated over and over
+  - Instead of filtering out automatically, it could be nice to allow the user to choose a minimum number of words in the generated line(s) - some people may not appreaciate the lyric being "Ooh-ah"
 - Add more detailed statistics:
   - Pie charts showing album distribution of correct and incorrect (gave up) responses
 - Saving user data (your highest %, longest streak, etc.)
