@@ -18,12 +18,14 @@ Instructions are provided on the left sidebar, as needed.
 
 #### TODO: 
 - Address first: get the hints to show up on top of each other instead of Hint 2 obscuring Hint 1
+- Fix the points system - it's a little too arbitrary right now. Penalizes too much as well.
+  - Points breakdown in the instructions panel 
 - Make the 2nd hint the line after instead of line before
 - Possibly filter out lyrics that are < 5 words in length for medium and hard mode, and also the lyrics that are simply the same word repeated over and over
 - Add more detailed statistics:
   - Pie charts showing album distribution of correct and incorrect (gave up) responses
 - Saving user data (your highest %, longest streak, etc.)
-  - Streaks in general would be cool
+  - Streaks in general would be cool - this should be easy to implement. Use a counter. 
 - Possibly add non-album singles e.g. Only the Young, Christmas Tree Farm (but provide users with the option of removing them)
 - (SHOULD NOW BE FIXED) I could have seen wrong but there might be an issue with the previous/next lyric hint where the lyric came from an entirely different song? Maybe I imagined this.
 - Add option to set seed for the randomizer - but might need to have an info button for it for an explanation of what it does 
