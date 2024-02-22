@@ -77,12 +77,14 @@ ui = page_navbar(title = strong(emojifont::emoji("sparkles"), "tayLyrics",
                               (Taylor's Version) or (10 Minute Version) in your 
                               answers. Capitalization does ", em("not"), 
                               " matter, and neither do minor spelling errors.")),
-                     p("Points are deducted from your score if you guess 
-                       incorrectly, ask for a hint, or give up."), 
+                     p("Points:"), 
                      tags$ul(
-                       tags$li("Incorrect guess (in any mode): -2 points"), 
+                       tags$li("Correct guess (easy): +2 point"), 
+                       tags$li("Correct guess (medium): +6 points"),
+                       tags$li("Correct guess (hard): +8 points"),
+                       tags$li("Incorrect guess (any mode): -2 points"), 
                        tags$li("Hint: -1 point"),
-                       tags$li("Giving up: -3 points")
+                       tags$li("Giving up: -2 points")
                      ),
                      p("There are three hints available for 
                        each set of lyrics."), 
@@ -259,12 +261,20 @@ server = function(input, output, session) {
                     (allLyrics$album_name == lastLine$album_name) &
                     (allLyrics$track_name == lastLine$track_name))
       
-      if (lastLine$track_name != allLyrics[end,]$track_name) {
-        hintMessage = "N/A"
+      # if (lastLine$track_name != allLyrics[end,]$track_name) {
+      #   hintMessage = "N/A"
+      # }
+      # 
+      # else {
+      #   hintMessage = allLyrics$lyric[end + 1]
+      # }
+      
+      if (lastLine$track_name == allLyrics[end + 1,]$track_name) {
+        hintMessage = allLyrics$lyric[end + 1]
       }
       
       else {
-        hintMessage = allLyrics$lyric[end + 1]
+        hintMessage = "NA"
       }
     }
     # give the PREVIOUS line
@@ -276,11 +286,19 @@ server = function(input, output, session) {
                       (allLyrics$line == firstLine$line) &
                       (allLyrics$album_name == firstLine$album_name) &
                       (allLyrics$track_name == firstLine$track_name))
-      if (firstLine$track_name != allLyrics[start,]$track_name) {
-        hintMessage = "N/A"
-      }
-      else {
+      # if (firstLine$track_name != allLyrics[start,]$track_name) {
+      #   hintMessage = "N/A"
+      # }
+      # else {
+      #   hintMessage = allLyrics$lyric[start - 1]
+      # }
+      
+      if (firstLine$track_name == allLyrics[start - 1,]$track_name) {
         hintMessage = allLyrics$lyric[start - 1]
+      }
+      
+      else {
+        hintMessage = "NA"
       }
       
       shinyjs::disable("hintButton")
@@ -399,7 +417,7 @@ server = function(input, output, session) {
     }
   })
   wantAnswer = eventReactive(input$giveUpButton, {
-    counter$counterValue = counter$counterValue - 3
+    counter$counterValue = counter$counterValue - 2
     shinyjs::disable("submit")
     shinyjs::enable("generateButton")
     shinyjs::disable("giveUpButton")
