@@ -32,7 +32,11 @@ Deductions:
 ***
 
 #### TODO: 
-- Address first: get the hints to show up on top of each other instead of Hint 2 obscuring Hint 1
+- **To address first**:
+  - Get the hints to show up on top of each other instead of Hint 2 obscuring Hint 1
+  - When an answer is wrong when a previous round's answer was correct, the output jumps a little? Not sure how to fix it but it would be really nice to
+ - Allow users to choose which hint they want - this would also fix the issue where the hints obscure each other; I can pretty easily separate them by doing this
+ - Maybe limit the number of guesses per round? Or at least provide the option of doing so?
 - Fix the points system - it's a little too arbitrary right now. Penalizes too much as well.
   - Points breakdown in the instructions panel 
 - Possibly filter out lyrics that are < 5 words in length for medium and hard mode, and also the lyrics that are simply the same word repeated over and over
