@@ -2,6 +2,8 @@
 
 #### How well do you know Taylor Swift's lyrics? :D
 
+Lyrics from debut up to 1989 (Taylor's Version) are included. I will update this to include The Tortured Poet's Department as soon as I can!
+
 This is still a work in progress, but for entertainment purposes, [here](https://jasminex21.shinyapps.io/tayLyrics/) is the link to the game. 
 
 ***
