@@ -110,11 +110,10 @@ ui = page_navbar(title = strong(emojifont::emoji("sparkles"), "tayLyrics",
                          textOutput("totalRounds"), 
                          textOutput("totalCorrect"), 
                          textOutput("pointsProp"), 
-                         span(style = "color: #079B7B", textOutput("totalPoints")), 
+                         textOutput("currentStreak"), 
+                         span(style = "color: green", textOutput("totalPoints")), 
                          style = "font-weight: bold"
                        ),
-                       # highchartOutput("correctPie")
-                       
                      ), 
                      
                      fluidRow( 
@@ -124,10 +123,11 @@ ui = page_navbar(title = strong(emojifont::emoji("sparkles"), "tayLyrics",
                                                          "Medium mode (2 lines)" = 2, 
                                                          "Hard mode (1 line)" = 3), 
                                              selected = 1)), 
-                       # column(3, textInput("seed", 
-                       #                     label = "Set seed (optional)", 
-                       #                     placeholder = "e.g. 21")), 
-                       column(4)),
+                       column(3, textInput("seed",
+                                           label = "Set seed (optional)",
+                                           placeholder = "e.g. 21 or 2013"), 
+                              actionButton("submitSeed", 
+                                           "Submit"))),
                      fluidRow(
                        checkboxGroupInput(
                          "albums", 
@@ -141,12 +141,6 @@ ui = page_navbar(title = strong(emojifont::emoji("sparkles"), "tayLyrics",
                                             "Generate!", 
                                             class = "btn btn-sm")),
                      h4(strong("What song are these lyrics from?")),
-                     # card(
-                     #   class = "lyricCard",
-                     #   full_screen = T, 
-                     #   height = "600px",
-                     #   htmlOutput("randGenerated")
-                     # ), 
                      div(class = "randGenDiv", br(), htmlOutput("randGenerated"), br()),
                      # hr(), 
                      tagAppendAttributes(
@@ -177,10 +171,20 @@ server = function(input, output, session) {
   # setting a different seed each time the game is reloaded
   set.seed(round(as.numeric(Sys.time())))
   
-  rounds = reactiveValues(roundValue = 0)
+  observeEvent(input$submitSeed, {
+    seed = as.numeric(input$seed)
+    if (!is.na(seed)) {
+      set.seed(seed)
+      shinyjs::disable("submitSeed")
+    }
+    else {
+      shinyalert("Please enter a valid numerical seed, or leave this blank!")
+    }
+  })
   
+  rounds = reactiveValues(roundValue = 0)
   hints = reactiveValues(hintsCount = 0)
-  # history$drop()
+  streaks = reactiveValues(streak = 0)
   
   buttonPressed = eventReactive(input$generateButton, {
     shinyjs::disable("generateButton")
@@ -203,6 +207,7 @@ server = function(input, output, session) {
     
     else {
       rounds$roundValue = rounds$roundValue + 1
+      
       randNum = floor(runif(1, min = 1, max = nrow(allLyrics)))
       
       if (input$mode == 3) {
@@ -261,14 +266,6 @@ server = function(input, output, session) {
                     (allLyrics$album_name == lastLine$album_name) &
                     (allLyrics$track_name == lastLine$track_name))
       
-      # if (lastLine$track_name != allLyrics[end,]$track_name) {
-      #   hintMessage = "N/A"
-      # }
-      # 
-      # else {
-      #   hintMessage = allLyrics$lyric[end + 1]
-      # }
-      
       if (lastLine$track_name == allLyrics[end + 1,]$track_name) {
         hintMessage = allLyrics$lyric[end + 1]
       }
@@ -286,12 +283,6 @@ server = function(input, output, session) {
                       (allLyrics$line == firstLine$line) &
                       (allLyrics$album_name == firstLine$album_name) &
                       (allLyrics$track_name == firstLine$track_name))
-      # if (firstLine$track_name != allLyrics[start,]$track_name) {
-      #   hintMessage = "N/A"
-      # }
-      # else {
-      #   hintMessage = allLyrics$lyric[start - 1]
-      # }
       
       if (firstLine$track_name == allLyrics[start - 1,]$track_name) {
         hintMessage = allLyrics$lyric[start - 1]
@@ -318,6 +309,8 @@ server = function(input, output, session) {
     if (stringdist(str_to_lower(buttonPressed()$track_name[1]), 
                    str_to_lower(guess)) <= allowedDiff) {
       corrects$correctsValue = corrects$correctsValue + 1
+      # add 1 to streak
+      streaks$streak = streaks$streak + 1
       # reset hints
       hints$hintsCount = 0
       shinyjs::enable("generateButton")
@@ -337,24 +330,7 @@ server = function(input, output, session) {
         counter$counterValue = counter$counterValue + 8
         availPoints$availValue = availPoints$availValue + 8
       }
-      
-      # add status to tibble (lyrics answered correctly)
-      # addRow = tibble(
-      #   album = buttonPressed()$album_name[1], 
-      #   status = "Correct"
-      # )
-      # 
-      # albumTracker = albumTracker %>%
-      #   add_row(addRow)
-      # print("correct")
-      # print(albumTracker)
-      addRow = data.frame(
-        album = buttonPressed()$album_name[1], 
-        status = "Correct"
-      )
-      # history$insert(addRow)
-      # print(history$find())
-      
+
       HTML(paste(tags$span(style = "color:green;font-size:larger;font-weight:800", 
                            tags$strong("Correct!")),
                  br(),  
@@ -365,9 +341,11 @@ server = function(input, output, session) {
                  em(strong(buttonPressed()$album_name[1])), 
                  br(), br(), sep = ""), 
            .noWS = "outside")
-      
     }
+    # answered incorrectly
     else {
+      # reset streak to 0
+      streaks$streak = 0
       counter$counterValue = counter$counterValue - 2
       if (input$mode == 1) {
         availPoints$availValue = availPoints$availValue + 2
@@ -416,8 +394,11 @@ server = function(input, output, session) {
                   br(), br()))
     }
   })
+  # gave up
   wantAnswer = eventReactive(input$giveUpButton, {
     counter$counterValue = counter$counterValue - 2
+    # reset streak to 0
+    streaks$streak = 0
     shinyjs::disable("submit")
     shinyjs::enable("generateButton")
     shinyjs::disable("giveUpButton")
@@ -426,19 +407,10 @@ server = function(input, output, session) {
     # reset hints
     hints$hintsCount = 0
     
-    # addRow = tibble(
-    #   album = buttonPressed()$album_name[1], 
-    #   status = "Gave up"
-    # )
-    # albumTracker = albumTracker %>%
-    #   add_row(addRow)
-    # print(albumTracker)
-    
     addRow = data.frame(
       album = buttonPressed()$album_name[1], 
       status = "Gave up"
     )
-    # history$insert(addRow)
     
     buttonPressed()$track_name[1]
   })
@@ -456,7 +428,7 @@ server = function(input, output, session) {
   })
   output$totalCorrect = renderText({
     percentage = round((corrects$correctsValue / rounds$roundValue) * 100, digits = 2)
-    paste0("Accuracy: ", corrects$correctsValue, "/", rounds$roundValue, 
+    paste0("Accuracy", emojifont::emoji("white_check_mark"), ": ", corrects$correctsValue, "/", rounds$roundValue, 
            " (", percentage, "%)")
   })
   output$totalPoints = renderText({
@@ -465,6 +437,9 @@ server = function(input, output, session) {
   output$pointsProp = renderText({
     propPerc = round((counter$counterValue / availPoints$availValue) * 100, digits = 2)
     paste0("Points out of possible: ", counter$counterValue, "/", availPoints$availValue, " (", propPerc, "%)")
+  })
+  output$currentStreak = renderText({
+    paste0("Current streak", emojifont::emoji("fire"), ": ", streaks$streak)
   })
   observeEvent(input$submit, {
     shinyjs::show("guessFeedback")
@@ -480,60 +455,6 @@ server = function(input, output, session) {
   observeEvent(input$giveUpButton, {
     shinyjs::show("printAnswer")
   })
-  
-  correctData = reactive({
-    if (nrow(history$find()) > 0) {
-      history$find() %>% 
-        filter(status == "Correct") %>%
-        group_by(album) %>%
-        count()
-    }
-    else {
-      tibble(
-        album = character(), 
-        n = integer()
-      )
-    }
-  })
-  
-  output$correctPie = renderHighchart({
-    # pie_chart = hchart(correctData(), "pie", hcaes(x = album, y = n)) %>%
-    #   hc_title(text = "Album Lyrics Answered Correctly")
-    # print(correctData())
-    # highchart() |> 
-    #   hc_chart(type = "pie") |> 
-    #   hc_add_series(data = correctData()) |>
-    #   hc_title(text = "Correct Answers") |>
-    #   hc_plotOptions(pie = list(
-    #     dataLabels = list(
-    #       enabled = TRUE
-    #     )
-    #   ))
-    
-    if (!is.null(correctData())) {
-      data = correctData()
-      
-    }
-    else {
-      data = tibble()
-      # data = tibble(
-      #   album = character(0), 
-      #   n = numeric(0)
-      # )
-    }
-    print(data)
-    
-    data %>%
-      hchart("pie", hcaes(x = album, y = n)) %>%
-      hc_title(text = "Your Correct Answers") %>%
-      hc_plotOptions(pie = list(
-        dataLabels = list(
-          enabled = T
-        )
-      ))
-    
-  })
-  
 }
 
 shinyApp(ui = ui, server = server)
