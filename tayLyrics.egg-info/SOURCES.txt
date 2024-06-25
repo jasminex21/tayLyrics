@@ -1,5 +1,6 @@
 README.md
 setup.py
+server_tools/Lyrics.py
 server_tools/__init__.py
 server_tools/generate_lyric.py
 tayLyrics.egg-info/PKG-INFO
