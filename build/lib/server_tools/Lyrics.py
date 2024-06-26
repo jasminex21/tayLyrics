@@ -2,6 +2,7 @@ import pandas as pd
 import random
 import time
 import math
+import re
 import stringdist
 
 data = pd.read_csv("/home/jasmine/OneDrive - The University of Texas at Austin/Personal Projects/tayLyrics_v2/tayLyrics/TAYLOR_LYRICS_JUN2024.csv")
@@ -44,11 +45,13 @@ class Lyrics():
         return self.data["album_name"][self.rand_num]
     
     def get_guess_feedback(self, guess): 
-        # remove whitespace
+        # remove parentheses (e.g. Taylor's Version) from track name
+        correct_song = re.sub(r"\([^)]*\)", "", self.get_track_name()).strip()
+        # remove whitespace from guess
         guess = guess.strip()
         # allowing for minor typos
-        track_name_length = len(self.get_track_name())
+        track_name_length = len(correct_song)
         allowed_diff = math.ceil(track_name_length * 0.33)
-        if stringdist.levenshtein(guess, self.get_track_name()) <= allowed_diff: 
+        if stringdist.levenshtein(guess.lower(), correct_song.lower()) <= allowed_diff: 
             return True
         return False

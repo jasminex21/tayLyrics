@@ -23,23 +23,26 @@ if "correct_song" not in st.session_state:
     st.session_state.correct_song = None
 if "correct_album" not in st.session_state: 
     st.session_state.correct_album = None
-if 'button_clicked' not in st.session_state:
-    st.session_state.button_clicked = False
+# if 'button_clicked' not in st.session_state:
+#     st.session_state.button_clicked = False
+if "next" not in st.session_state: 
+    st.session_state.next = False
 
 def submit():
     st.session_state.guess = st.session_state.widget
     st.session_state.widget = ""
 
+def next_round(): 
+    st.session_state.next = True
+
 def disable_btn(): 
     st.session_state.button_clicked = True
 
-def enable_btn():
-    st.session_state.button_clicked = False
-    st.session_state.generate_btn_state = False
-    st.session_state.guess = None
-    st.session_state.correct_song = None
-    st.session_state.correct_album = None
-    # st.experimental_rerun()
+def round(mode): 
+    generated_lyrics = st.session_state.lyrics.generate(mode)
+    correct_song = st.session_state.lyrics.get_track_name()
+    correct_album = st.session_state.lyrics.get_album_name()
+    return generated_lyrics, correct_song, correct_album
 
 # TODO: implement survival mode (w/ lives)
 
@@ -60,14 +63,13 @@ with st.expander("Advanced options"):
                                     default=all_albums)
     # TODO: set seed option
     # TODO: disable button after clicked
-st.write(st.session_state.button_clicked)
-if st.button("Start game", on_click=disable_btn,
-             disabled=st.session_state.get("button_clicked", False)): 
+start_btn = st.button("Start game", on_click=disable_btn,
+                      disabled=st.session_state.get("button_clicked", False))
+generated_lyrics = None
+if (start_btn) or (st.session_state.next):
     st.session_state.generate_btn_state = True
-    # st.session_state.button_clicked = True
-    st.session_state.generated_lyrics = st.session_state.lyrics.generate(mode=mode)
-    st.session_state.correct_song = st.session_state.lyrics.get_track_name()
-    st.session_state.correct_album = st.session_state.lyrics.get_album_name()
+    st.session_state.next = False
+    st.session_state.generated_lyrics, st.session_state.correct_song, st.session_state.correct_album = round(mode=mode)
 with st.container(border=True): 
     if st.session_state.generate_btn_state:
         st.write(st.session_state.generated_lyrics, unsafe_allow_html=True)
@@ -79,15 +81,10 @@ with st.container(border=True):
             st.session_state.button_clicked = False
             st.success(f'That is correct! The answer is indeed {st.session_state.correct_song}, from the album {st.session_state.correct_album}. Well done!', icon="✅")
             st.session_state.guess = None
-            next_btn = st.button("Next round")
-            if next_btn: 
-                    st.session_state.generate_btn_state = True
-                    # st.session_state.button_clicked = True
-                    st.session_state.generated_lyrics = st.session_state.lyrics.generate(mode=mode)
-                    st.session_state.correct_song = st.session_state.lyrics.get_track_name()
-                    st.session_state.correct_album = st.session_state.lyrics.get_album_name()
+            st.button("Next round", key="next_btn", on_click=next_round)
         else: 
             st.error(f'"{st.session_state.guess}" is not correct. Please try again!', icon="🚨")
 
 st.write(st.session_state.correct_song)
 st.write(st.session_state.guess)
+st.write(f"next: {st.session_state.next}")
