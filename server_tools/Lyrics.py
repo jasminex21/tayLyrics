@@ -45,12 +45,12 @@ class Lyrics():
         return self.data["album_name"][self.rand_num]
 
     def get_previous_line(self):
-        if self.data["track_name"][self.rand_num - 1] == self.get_album_name():
+        if self.data["track_name"][self.rand_num - 1] == self.get_track_name():
             return self.data["lyric"][self.rand_num - 1]
         return "N/A"
 
     def get_next_line(self):
-        if self.data["track_name"][self.rand_num + 1] == self.get_album_name():
+        if self.data["track_name"][self.rand_num + 1] == self.get_track_name():
             return self.data["lyric"][self.rand_num + 1]
         return "N/A"
     

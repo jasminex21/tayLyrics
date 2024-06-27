@@ -34,6 +34,7 @@ if "next" not in st.session_state:
 if "hint_count" not in st.session_state: 
     st.session_state.hint_count = 0
 
+
 def submit():
     st.session_state.guess = st.session_state.widget
     st.session_state.widget = ""
@@ -49,11 +50,15 @@ def round(mode):
     correct_song = st.session_state.lyrics.get_track_name()
     correct_album = st.session_state.lyrics.get_album_name()
     next_line = st.session_state.lyrics.get_next_line()
-    prev_line = st.session_state.lyrics.get_prev_line()
-    return generated_lyrics, correct_song, correct_album
+    prev_line = st.session_state.lyrics.get_previous_line()
+    return generated_lyrics, correct_song, correct_album, next_line, prev_line
 
 def add_hint(): 
     st.session_state.hint_count += 1
+
+def give_up(): 
+    st.error(f"The correct answer was {st.session_state.correct_song}, from the album {st.session_state.correct_album}", icon="🚨")
+    next_round()
 
 # TODO: implement survival mode (w/ lives)
 
@@ -85,10 +90,13 @@ with st.container(border=True):
                       placeholder="e.g. Back to December or Shake it Off", 
                       key="widget", on_change=submit)
         hint_btn = st.button("Hint", on_click=add_hint)
+        giveup_btn = st.button("Give up", on_click=give_up)
     if st.session_state.hint_count == 1: 
         st.info(f"Hint 1: this song comes from the album {st.session_state.correct_album}", icon="ℹ️")
     if st.session_state.hint_count == 2: 
-        st.info(f"Hint 2: the next line of this song is {st.session_state.next_line}", icon="ℹ️)
+        st.info(f"Hint 2: the next line of this song is {st.session_state.next_line}", icon="ℹ️")
+    if st.session_state.hint_count == 3: 
+        st.info(f"Hint 3: the previous line of this song is {st.session_state.prev_line}", icon="ℹ️")
     if st.session_state.guess: 
         if st.session_state.lyrics.get_guess_feedback(st.session_state.guess): 
             st.session_state.button_clicked = False
