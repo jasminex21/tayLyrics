@@ -46,6 +46,7 @@ def disable_btn():
     st.session_state.button_clicked = True
 
 def round(mode): 
+    st.session_state.hint_count = 0
     generated_lyrics = st.session_state.lyrics.generate(mode)
     correct_song = st.session_state.lyrics.get_track_name()
     correct_album = st.session_state.lyrics.get_album_name()
@@ -55,10 +56,18 @@ def round(mode):
 
 def add_hint(): 
     st.session_state.hint_count += 1
+    if st.session_state.hint_count == 1: 
+        st.info(f"Hint 1: this song comes from the album {st.session_state.correct_album}", icon="ℹ️")
+    if st.session_state.hint_count == 2: 
+        st.info(f'Hint 2: the next line of this song is "{st.session_state.next_line}"', icon="ℹ️")
+    if st.session_state.hint_count == 3: 
+        st.info(f'Hint 3: the previous line of this song is "{st.session_state.prev_line}"', icon="ℹ️")
+    if st.session_state.hint_count > 3: 
+        st.info(f'No more hints remaining.', icon="ℹ️")
 
 def give_up(): 
     st.error(f"The correct answer was {st.session_state.correct_song}, from the album {st.session_state.correct_album}", icon="🚨")
-    next_round()
+    # next_round()
 
 # TODO: implement survival mode (w/ lives)
 
@@ -73,6 +82,7 @@ with st.sidebar:
             selected_albums = st.multiselect("Select albums to generate lyrics from", 
                                              options=all_albums, 
                                              default=all_albums)
+        # TODO: disable button until game ends
         start_btn = st.form_submit_button("Start game")
 
 # MAIN PANEL #
@@ -91,12 +101,6 @@ with st.container(border=True):
                       key="widget", on_change=submit)
         hint_btn = st.button("Hint", on_click=add_hint)
         giveup_btn = st.button("Give up", on_click=give_up)
-    if st.session_state.hint_count == 1: 
-        st.info(f"Hint 1: this song comes from the album {st.session_state.correct_album}", icon="ℹ️")
-    if st.session_state.hint_count == 2: 
-        st.info(f"Hint 2: the next line of this song is {st.session_state.next_line}", icon="ℹ️")
-    if st.session_state.hint_count == 3: 
-        st.info(f"Hint 3: the previous line of this song is {st.session_state.prev_line}", icon="ℹ️")
     if st.session_state.guess: 
         if st.session_state.lyrics.get_guess_feedback(st.session_state.guess): 
             st.session_state.button_clicked = False
