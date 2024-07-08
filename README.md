@@ -34,14 +34,11 @@ Deductions:
 ***
 
 #### TODO: 
-- **To address first**:
-  - When an answer is wrong when a previous round's answer was correct, the output jumps a little? Not sure how to fix it but it would be really nice to
- - Allow users to choose which hint they want - this would also fix the issue where the hints obscure each other; I can pretty easily separate them by doing this
- - Maybe limit the number of guesses per round? Or at least provide the option of doing so?
-- Fix the points system - it's a little too arbitrary right now. Penalizes too much as well.
-- Possibly filter out lyrics that are < 5 words in length for medium and hard mode, and also the lyrics that are simply the same word repeated over and over
-  - Instead of filtering out automatically, it could be nice to allow the user to choose a minimum number of words in the generated line(s) - some people may not appreaciate the lyric being "Ooh-ah"
-- Add more detailed statistics:
-  - Pie charts showing album distribution of correct and incorrect (gave up) responses (looking back, this might be too extra and not worthwhile - album distribution overall might be fun though)
-- Possibly add non-album singles e.g. Only the Young, Christmas Tree Farm (but provide users with the option of removing them)
+**NEW**
+* Implement survival/creative modes
+  * Survival would be that you get, say, 3 lives, and you try to get as many points as possible from that. You lose a life if you get an answer wrong.
+  * Creative would not have lives, just points
+* Not sure how to customize streamlit apps using CSS just yet, but it would be cool to have themes based on the albums. E.g. debut theme would be green and blue, red theme would be red, reputation theme would be black, etc. Just like the background color, text color, etc. 
+**Old but still worth exploring**
+* Adding non-album singles e.g. Only the Young, Christmas Tree Farm, but provide users with the option of removing them. Like a checkbox in the Advanced Options expander. 
 
