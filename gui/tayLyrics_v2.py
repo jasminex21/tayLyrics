@@ -1,4 +1,5 @@
 import streamlit as st 
+from streamlit_modal import Modal
 import pandas as pd
 import numpy as np
 
@@ -66,6 +67,10 @@ if "disable_start_btn" not in st.session_state:
     st.session_state.disable_start_btn = False
 if "correct_rounds_count" not in st.session_state: 
     st.session_state.correct_rounds_count = 0
+if "lives" not in st.session_state: 
+    st.session_state.lives = 0
+if "past_game_scores" not in st.session_state:
+    st.session_state.past_game_scores = None
 
 def guess_submitted():
     st.session_state.guess = st.session_state.widget
@@ -90,23 +95,40 @@ def new_round(mode):
     return generated_lyrics, correct_song, correct_album, next_line, prev_line
 
 def end_current_game(): 
+    accuracy_pct = round((st.session_state.correct_rounds_count / st.session_state.round_count), 2) * 100
+
+    st.session_state.past_game_scores = f"""
+**{mode_mapping[mode]} difficulty, {st.session_state.round_count} rounds played**
+* Accuracy: {st.session_state.correct_rounds_count}/{st.session_state.round_count} ({accuracy_pct}%)
+* Points out of total possible: {st.session_state.points}/{st.session_state.round_count * points_mapping[mode]} ({possible_pct}%)
+* :green[**Total points: {st.session_state.points}**]
+"""
+
     st.session_state.disable_start_btn = False
     st.session_state.show_lyrics = False
     st.session_state.points = 0
     st.session_state.round_count = 0
     st.session_state.correct_rounds_count = 0
 
-def disable_start_button(): 
+def disable_start_button(game_mode): 
     st.session_state.disable_start_btn = True
+    if game_mode == "Survival (with 3 lives)":
+        st.session_state.lives = 3
 
 def next_round(): 
     st.session_state.next = True
 
-def give_up(): 
+def give_up(game_mode): 
     st.session_state.disable_guess_input = True
+    st.session_state.disable_giveup_btn = True
+    st.session_state.disable_hint_btn = True
     st.session_state.points -= 2
-    container.error(f"The correct answer was {st.session_state.correct_song}, from the album {st.session_state.correct_album}", icon="🚨")
-    container.button("Next round", on_click=next_round)
+    msg = f"The correct answer was {st.session_state.correct_song}, from the album {st.session_state.correct_album}"
+    if game_mode == "Survival (with 3 lives)":
+        st.session_state.lives -= 1
+        msg = f"The correct answer was {st.session_state.correct_song}, from the album {st.session_state.correct_album}. You lost a life and have {st.session_state.lives} lives left."
+    container.error(msg, icon="🚨")
+    container.button(":arrow_right: Next round", on_click=next_round)
 
 def add_hint(): 
     st.session_state.hint_count += 1
@@ -127,11 +149,12 @@ def answered_correctly():
     st.session_state.disable_hint_btn = True
     st.session_state.disable_giveup_btn = True
 
-    container.button("Next round", on_click=next_round)
+    container.button(":arrow_right: Next round", on_click=next_round)
 
 def answered_incorrectly(): 
     container.error(f'"{st.session_state.guess}" is not correct. Please try again!', icon="🚨")
     st.session_state.points -= 1
+    
 
 # TODO: implement survival mode (w/ lives)
 
@@ -151,8 +174,8 @@ with st.sidebar:
                                              options=all_albums, 
                                              default=all_albums, 
                                              disabled=st.session_state.disable_start_btn)
-        # TODO: disable button until game ends
-        start_btn = st.form_submit_button("Start new game", disabled=st.session_state.disable_start_btn, on_click=disable_start_button)
+        start_btn = st.form_submit_button(":large_green_square: Start new game", disabled=st.session_state.disable_start_btn, 
+                                          on_click=disable_start_button, args=(game_mode,))
 
 # MAIN PANEL #
 if (start_btn) or st.session_state.next: 
@@ -171,23 +194,28 @@ with container:
                 answered_correctly()
             else: 
                 answered_incorrectly()
-        col1, col2, col3, col4 = st.columns(4)
-        hint_btn = col1.button("Hint", on_click=add_hint, disabled=st.session_state.disable_hint_btn, 
+        col1, col2, col3 = st.columns(3)
+        hint_btn = col1.button(":bulb: Hint", on_click=add_hint, disabled=st.session_state.disable_hint_btn, 
                                help=hint_help)
-        giveup_btn = st.button("Give up", on_click=give_up, disabled=st.session_state.disable_giveup_btn,
-                               help="2 points are deducted from your total if you give up.")
-        col4.button("End current game", on_click=end_current_game)
+        giveup_btn = st.button(":no_entry: Give up", on_click=give_up, disabled=st.session_state.disable_giveup_btn,
+                               help="2 points are deducted from your total if you give up.", args=(game_mode,))
+        col3.button(":x: End current game", on_click=end_current_game)
     else: 
         st.markdown('Click the "Start new game" button to start guessing!')
+        st.divider()
+        if st.session_state.past_game_scores: 
+            st.markdown("### Past Game Statistics")
+            st.markdown(st.session_state.past_game_scores)
 
 st.sidebar.divider()
 with st.sidebar.container(border=True):
     st.markdown("### Game Statistics")
     st.markdown(f"**{mode_mapping[mode]} difficulty, round {st.session_state.round_count}**")
-    st.markdown(f"* Total points: {st.session_state.points}")
     if st.session_state.round_count: 
         accuracy_pct = round((st.session_state.correct_rounds_count / st.session_state.round_count), 2) * 100
         st.markdown(f"* Accuracy: {st.session_state.correct_rounds_count}/{st.session_state.round_count} ({accuracy_pct}%)")
-        possible_pct = round((st.session_state.points / st.session_state.round_count * points_mapping[mode]), 2) * 100
-        st.markdown(f"* :green[Points out of total possible: {st.session_state.points}/{st.session_state.round_count * points_mapping[mode]} ({possible_pct}%)]")
-        
+        possible_pct = round((st.session_state.points / (st.session_state.round_count * points_mapping[mode])), 2) * 100
+        st.markdown(f"* Points out of total possible: {st.session_state.points}/{st.session_state.round_count * points_mapping[mode]} ({possible_pct}%)")
+        st.markdown(f"* :green[**Total points: {st.session_state.points}**]")
+    if game_mode == "Survival (with 3 lives)":
+        st.markdown(f"* :red[Lives: {st.session_state.lives}]")
