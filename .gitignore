@@ -3,4 +3,5 @@
 **.pkl
 **.egg-info
 **.ipynb_checkpoints/
+**.streamlit/
 build/

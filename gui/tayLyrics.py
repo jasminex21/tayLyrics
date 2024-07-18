@@ -74,6 +74,9 @@ if "streak" not in st.session_state:
     st.session_state.streak = 0
 if "streaks" not in st.session_state: 
     st.session_state.streaks = []
+if "disable_general" not in st.session_state: 
+    st.session_state.disable_general = False
+
 
 def guess_submitted():
     st.session_state.guess = st.session_state.widget
@@ -112,14 +115,24 @@ def end_current_game():
     st.session_state.streak = 0
     st.session_state.streaks = []
     st.session_state.disable_start_btn = False
+    st.session_state.disable_general = False
     st.session_state.show_lyrics = False
     st.session_state.points = 0
     st.session_state.round_count = 0
     st.session_state.correct_rounds_count = 0
 
 def disable_start_button(): 
-    st.session_state.disable_start_btn = True
-    st.session_state.lives = 3
+
+    if len(st.session_state.albums) == 0: 
+        start_form.error("Please select at least one album.")
+    else: 
+        st.session_state.disable_start_btn = True
+        st.session_state.disable_general = True
+        st.session_state.lives = 3
+
+        filtered_lyrics = all_lyrics[all_lyrics["album_name"].isin(st.session_state.albums)].reset_index()
+        st.session_state.lyrics = Lyrics(data=filtered_lyrics)
+    
 
 def next_round(): 
     st.session_state.next = True
@@ -186,25 +199,33 @@ def answered_incorrectly(game_mode):
 st.title("Welcome to :sparkles:tayLyrics:sparkles:!")
 
 # SIDEBAR #
-with st.sidebar: 
-    with st.form("game_settings"): 
+sidebar = st.sidebar
+with sidebar: 
+    with st.expander(":pencil2: Instructions"): 
+        st.markdown(f"Lyrics range from debut to *{all_albums[-1]}*.")
+        st.markdown(f':red[**IMPORTANT: do NOT include parentheses in your guesses; e.g. "Back to December (Taylor\'s Version)" should simply be "Back to December."**]')
+    start_form = st.form("game_settings")
+    with start_form:
         mode = st.selectbox("Select a game difficulty", 
                             options=mode_options, 
-                            disabled=st.session_state.disable_start_btn)
+                            disabled=st.session_state.disable_general)
         game_mode = st.selectbox("Select a game mode", 
                                  options=gamemode_options,
-                                 disabled=st.session_state.disable_start_btn)
+                                 disabled=st.session_state.disable_general)
         with st.expander("Advanced options"):
             selected_albums = st.multiselect("Select albums to generate lyrics from", 
                                              options=all_albums, 
                                              default=all_albums, 
-                                             disabled=st.session_state.disable_start_btn)
-        start_btn = st.form_submit_button(":large_green_square: Start new game", disabled=st.session_state.disable_start_btn, 
+                                             disabled=st.session_state.disable_general, 
+                                             # on_change=albums_selected, 
+                                             key="albums")
+        start_btn = st.form_submit_button(":large_green_square: Start new game", disabled=(st.session_state.disable_start_btn),
                                           on_click=disable_start_button)
 
 # MAIN PANEL #
-if (start_btn) or st.session_state.next: 
+if (start_btn and len(selected_albums)) or st.session_state.next: 
     st.session_state.generated_lyrics, st.session_state.correct_song, st.session_state.correct_album, st.session_state.next_line, st.session_state.prev_line = new_round(mode=mode)
+    st.write(st.session_state.lyrics.rand_num)
 
 container = st.container(border=True)
 with container: 
