@@ -66,7 +66,10 @@ class Lyrics():
     
     def get_guess_feedback(self, guess): 
         # remove parentheses (e.g. Taylor's Version) from track name
-        correct_song = re.sub(r"\([^)]*\)", "", self.get_track_name()).strip()
+        correct_song = self.get_track_name()
+        if correct_song not in ["Mary's Song (Oh My My My)", 
+                                "I Can Fix Him (No Really I Can)"]:
+            correct_song = re.sub(r"\([^)]*\)", "", correct_song).strip()
         # remove whitespace from guess
         guess = guess.strip()
         # allowing for minor typos

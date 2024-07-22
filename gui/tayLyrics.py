@@ -4,6 +4,8 @@ import numpy as np
 
 from server_tools.Lyrics import Lyrics
 
+# TODO: possibly add leaderboard? Only if all albums selected
+
 # TODO: fix mistake in I Can Fix Him (No Really I Can) AND Mary's Song (Oh My My My)
 all_lyrics = pd.read_csv("/home/jasmine/tayLyrics_v2/tayLyrics/TAYLOR_LYRICS_JUN2024.csv")
 all_albums = ["Taylor Swift", 
@@ -255,6 +257,7 @@ with container:
 st.sidebar.divider()
 with st.sidebar.container(border=True):
     st.markdown("### Game Statistics")
+    # TODO: add the album filtering stuff; all if all, otherwise list all
     st.markdown(f"**{mode_mapping[mode]} difficulty, {game_mode} mode**")
     if st.session_state.round_count: 
         st.markdown(f"* :large_green_circle: **Round: {st.session_state.round_count}**")
