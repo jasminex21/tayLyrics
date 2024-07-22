@@ -1,8 +1,0 @@
-README.md
-setup.py
-server_tools/Lyrics.py
-server_tools/__init__.py
-tayLyrics.egg-info/PKG-INFO
-tayLyrics.egg-info/SOURCES.txt
-tayLyrics.egg-info/dependency_links.txt
-tayLyrics.egg-info/top_level.txt
