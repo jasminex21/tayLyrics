@@ -44,7 +44,7 @@ themes = ["Debut",
           "folklore",
           "evermore",
           "Midnights",
-          "Tortured Poets"]
+          "TTPD"]
 theme_css = {
     "Debut": {
         "background_color": "#006767",
@@ -53,9 +53,9 @@ theme_css = {
         "text_color": "white"
     },
     "Fearless": {
-        "background_color": "#d9c78f", 
-        "button_color": "#bb8f67",
-        "inputs": "#c3b377",
+        "background_color": "#c3b377", 
+        "button_color": "#BB9A4C",
+        "inputs": "#d9c78f",
         "text_color": "black"
     }, 
     "Speak Now": {
@@ -73,7 +73,43 @@ theme_css = {
     "1989": {
         "background_color": "#8A96AE",
         "button_color": "#ccc4c2",
-        "inputs": "	#748CA9",
+        "inputs": "#748CA9",
+        "text_color": "black"
+    },
+    "reputation": {
+        "background_color": "#222222",
+        "button_color": "#000000",
+        "inputs": "#4C4949",
+        "text_color": "white"
+    }, 
+    "Lover": {
+        "background_color": "#D39DA9",
+        "button_color": "#CC7CA3",
+        "inputs": "#FCBDC4",
+        "text_color": "black"
+    }, 
+    "folklore": {
+        "background_color": "#7f7f7f",
+        "button_color": "#616161",
+        "inputs": "#353535",
+        "text_color": "white"
+    },
+    "evermore": {
+        "background_color": "#643325",
+        "button_color": "#7f3c10	",
+        "inputs": "#895A38",
+        "text_color": "white"
+    },
+    "Midnights": {
+        "background_color": "#212145",
+        "button_color": "#1D1D34",
+        "inputs": "#4e4466",
+        "text_color": "white"
+    },
+    "TTPD": {
+        "background_color": "#a79e8f",
+        "button_color": "#6f6a66",
+        "inputs": "#9A9181",
         "text_color": "black"
     }
             }
@@ -139,13 +175,12 @@ def apply_theme(selected_theme):
     button {{
         background-color: {selected_theme['button_color']} !important;
     }}
-    [data-baseweb="base-input"], .st-cr, .st-c5 {{
+    .st-cr, .st-f5 {{
         background-color: {selected_theme['inputs']} !important;
         color: {selected_theme["text_color"]};
-        border-radius: 10px;
     }}
     p, ul, h3, h1 {{
-        font-weight: bolder;
+        font-weight: bolder !important;
         color: {selected_theme["text_color"]};
     }}
     .st-cb {{
