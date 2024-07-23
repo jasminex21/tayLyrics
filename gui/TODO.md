@@ -17,12 +17,14 @@
 #### Major
 * Leaderboard - if all albums are selected, have the option for leaderboard in the Past Game Summary area. For simplicity you can do this w a CSV file, otherwise databases
 * Add non-album singles to the dataset (album = Non-Album Single) and provide the option of filtering them out
+* Add seed-setting in advanced options so that generated lyrics are the same. Maybe there isn't a huge application but it would be fun if two people (e.g. me and Hannah) wanted to compete against each other
 * Figure out hosting
 
 #### Minor
 * Hover message for End Current Game button
+* Add section (Verse, Chorus) to the feedback messages
 * Fearless theme is very ugly
 
 #### Testing and General
 * Make sure the game works fine. Play it a ton and keep track of any possible mistakes 
-* Clean up the app file; move non-streamlit functions out, maybe do something about the initializing session states (they're piling up), and the CSS can all go somewhere confined as well
+* Clean up the app file; move non-streamlit functions out, maybe do something about the initializing session states (they're piling up), and the CSS can all go somewhere confined as well 

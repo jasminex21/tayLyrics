@@ -53,7 +53,7 @@ theme_css = {
         "text_color": "white"
     },
     "Fearless": {
-        "background_color": "#c3b377", 
+        "background_color": "#E4C864", 
         "button_color": "#BB9A4C",
         "inputs": "#d9c78f",
         "text_color": "black"
@@ -158,6 +158,14 @@ if "streaks" not in st.session_state:
     st.session_state.streaks = []
 if "game_over_msg" not in st.session_state: 
     st.session_state.game_over_msg = ""
+if "hint_str" not in st.session_state: 
+    st.session_state.hint_str = ""
+if "giveup_str" not in st.session_state: 
+    st.session_state.giveup_str = ""
+if "correct_str" not in st.session_state: 
+    st.session_state.correct_str = ""
+if "incorrect_str" not in st.session_state: 
+    st.session_state.incorrect_str = ""
 
 def apply_theme(selected_theme):
     css = f"""
@@ -208,6 +216,10 @@ def new_round(mode):
     st.session_state.disable_hint_btn = False
     st.session_state.disable_giveup_btn = False
     st.session_state.game_over_msg = ""
+    st.session_state.hint_str = ""
+    st.session_state.giveup_str = ""
+    st.session_state.correct_str = ""
+    st.session_state.incorrect_str = ""
 
     generated_lyrics = st.session_state.lyrics.generate(mode)
     correct_song = st.session_state.lyrics.get_track_name()
@@ -237,6 +249,10 @@ def end_current_game():
     st.session_state.round_count = 0
     st.session_state.correct_rounds_count = 0
     st.session_state.guess = ""
+    st.session_state.hint_str = ""
+    st.session_state.giveup_str = ""
+    st.session_state.correct_str = ""
+    st.session_state.incorrect_str = ""
 
 def disable_start_button(): 
 
@@ -261,29 +277,29 @@ def give_up(game_mode):
     st.session_state.lives -= 1
     st.session_state.streaks.append(st.session_state.streak)
     st.session_state.streak = 0
-    msg = f"The correct answer was {st.session_state.correct_song}, from the album {st.session_state.correct_album}"        
+    st.session_state.giveup_str = f"The correct answer was {st.session_state.correct_song}, from the album {st.session_state.correct_album}"        
     if game_mode == "Survival (with 3 lives)":
-        msg = f"The correct answer was {st.session_state.correct_song}, from the album {st.session_state.correct_album}. \n\nYou lost a life and have {st.session_state.lives} lives left."
+        st.session_state.giveup_str = st.session_state.giveup_str + f"\n\nYou lost a life and have {st.session_state.lives} lives left."
         if st.session_state.lives == 0: 
             st.session_state.game_over_msg = f'**GAME OVER**: You ran out of lives! Please start a new game.\n\nThe correct answer was **{st.session_state.correct_song}**, from the album **{st.session_state.correct_album}**.'
             end_current_game()
             return
-    container.error(msg, icon="🚨")
-    container.button(":arrow_right: Next round", on_click=next_round)
+    # container.error(msg, icon="🚨")
+    # container.button(":arrow_right: Next round", on_click=next_round)
 
 def add_hint(): 
     st.session_state.hint_count += 1
     st.session_state.points -= 1
     if st.session_state.hint_count == 1: 
-        container.info(f"Hint 1: this song comes from the album {st.session_state.correct_album}", icon="ℹ️")
+        st.session_state.hint_str += f"Hint 1: this song comes from the album {st.session_state.correct_album}"
     if st.session_state.hint_count == 2: 
-        container.info(f'Hint 2: the next line of this song is "{st.session_state.next_line}"', icon="ℹ️")
+        st.session_state.hint_str += f'\n\nHint 2: the next line of this song is "{st.session_state.next_line}"'
     if st.session_state.hint_count == 3: 
-        container.info(f'Hint 3: the previous line of this song is "{st.session_state.prev_line}"', icon="ℹ️")
         st.session_state.disable_hint_btn = True
+        st.session_state.hint_str += f'\n\nHint 3: the previous line of this song is "{st.session_state.prev_line}"'
 
 def answered_correctly(): 
-    container.success(f'That is correct! The answer is indeed {st.session_state.correct_song}, from the album {st.session_state.correct_album}. Well done!', icon="✅")
+    st.session_state.correct_str = f"That is correct! The answer is indeed {st.session_state.correct_song}, from the album {st.session_state.correct_album}. Well done!"
     st.session_state.points += points_mapping[mode]
     st.session_state.correct_rounds_count += 1
     st.session_state.guess = None
@@ -295,13 +311,14 @@ def answered_correctly():
     container.button(":arrow_right: Next round", on_click=next_round)
 
 def answered_incorrectly(game_mode): 
-    msg = f'"{st.session_state.guess}" is not correct. Please try again!'
+    st.session_state.incorrect_str = f'"{st.session_state.guess}" is not correct. Please try again!'
     st.session_state.points -= 1
     st.session_state.lives -= 1
+    st.session_state.guess = None
     st.session_state.streaks.append(st.session_state.streak)
     st.session_state.streak = 0
     if game_mode == "Survival (with 3 lives)":
-        msg = msg + f"\n\nYou lost a life and have {st.session_state.lives} lives left."
+        st.session_state.incorrect_str = st.session_state.incorrect_str + f"\n\nYou lost a life and have {st.session_state.lives} lives left."
         if st.session_state.lives == 0: 
             st.session_state.disable_guess_input = True
             st.session_state.disable_giveup_btn = True
@@ -310,7 +327,7 @@ def answered_incorrectly(game_mode):
             end_current_game()
             st.rerun()
             return
-    container.error(msg, icon="🚨")
+    # container.error(msg, icon="🚨")
     
 
 st.title("Welcome to :sparkles:tayLyrics:sparkles:!")
@@ -367,6 +384,17 @@ with container:
         giveup_btn = st.button(":no_entry: Give up", on_click=give_up, disabled=st.session_state.disable_giveup_btn,
                                help="2 points are deducted from your total if you give up.", args=(game_mode,))
         col3.button(":octagonal_sign: End current game", on_click=end_current_game, key="end_game")
+        # TODO: may be a way to clean this up
+        if st.session_state.hint_str:
+            st.info(f"{st.session_state.hint_str}", icon="ℹ️")
+        if st.session_state.correct_str:
+            st.success(f"{st.session_state.correct_str}", icon="✅")
+            container.button(":arrow_right: Next round", on_click=next_round)
+        if st.session_state.incorrect_str:
+            st.error(f"{st.session_state.incorrect_str}", icon="🚨")
+        if st.session_state.giveup_str:
+            st.error(f"{st.session_state.giveup_str}", icon="🚨")
+            container.button(":arrow_right: Next round", on_click=next_round)
     else: 
         st.markdown('Click the "Start new game" button to start guessing!')
         if st.session_state.past_game_scores: 
