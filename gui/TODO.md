@@ -1,5 +1,11 @@
 ### TODO
 
+#### Mistakes
+* Next round button disappears when theme is changed mid-round
+    * Presumably the solution would be to use a session state 
+* Takes away lives even for hints somehow only after you've answered incorrectly before
+* TTPD appears to be non-explicit
+
 #### Theming
 * Go through all the themes and correct any that may be too harsh on the eye
 * Figure out how to grey out the buttons when they are disabled - they used to be fine but with the theming it goes away
@@ -15,6 +21,8 @@
 
 #### Minor
 * Hover message for End Current Game button
+* Fearless theme is very ugly
 
-#### Testing
+#### Testing and General
 * Make sure the game works fine. Play it a ton and keep track of any possible mistakes 
+* Clean up the app file; move non-streamlit functions out, maybe do something about the initializing session states (they're piling up), and the CSS can all go somewhere confined as well
