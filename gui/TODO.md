@@ -1,14 +1,12 @@
 ### TODO
 
 #### Mistakes
-* Next round button disappears when theme is changed mid-round
-    * Presumably the solution would be to use a session state 
-* Takes away lives even for hints somehow only after you've answered incorrectly before
 * TTPD appears to be non-explicit
 
 #### Theming
 * Go through all the themes and correct any that may be too harsh on the eye
 * Figure out how to grey out the buttons when they are disabled - they used to be fine but with the theming it goes away
+    * Got the greyed out part (made the buttons transparent) but the text stays the same color. Would be nice to change text to grey
 * See if you can change the background color and text color of the message that displays when you hover over buttons
 * Make sure the error/success/etc messages show up fine w each theme
 * The red IMPORTANT text in the instructions is kind of blinding for certain themes. Same w the green text for total points. See if you can change that based on theme or just use a different color overall that works for all themes
@@ -27,4 +25,4 @@
 
 #### Testing and General
 * Make sure the game works fine. Play it a ton and keep track of any possible mistakes 
-* Clean up the app file; move non-streamlit functions out, maybe do something about the initializing session states (they're piling up), and the CSS can all go somewhere confined as well 
+* Clean up the app file (convert all global vars to all caps); move non-streamlit functions out, maybe do something about the initializing session states (they're piling up), and the CSS can all go somewhere confined as well 

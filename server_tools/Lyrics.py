@@ -64,6 +64,9 @@ class Lyrics():
             return self.data["lyric"][self.end_line + 1]
         return "N/A"
     
+    def get_section(self):
+        return self.data["element"][self.rand_num]
+    
     def get_guess_feedback(self, guess): 
         # remove parentheses (e.g. Taylor's Version) from track name
         correct_song = self.get_track_name()

@@ -122,6 +122,8 @@ if "correct_song" not in st.session_state:
     st.session_state.correct_song = None
 if "correct_album" not in st.session_state: 
     st.session_state.correct_album = None
+if "correct_section" not in st.session_state: 
+    st.session_state.correct_section = None
 if "next_line" not in st.session_state: 
     st.session_state.next_line = None
 if "prev_line" not in st.session_state: 
@@ -183,13 +185,20 @@ def apply_theme(selected_theme):
     button {{
         background-color: {selected_theme['button_color']} !important;
     }}
+    button:disabled {{
+        background-color: transparent !important;
+    }}
     .st-cr, .st-f5 {{
         background-color: {selected_theme['inputs']} !important;
         color: {selected_theme["text_color"]};
+        border-radius: 10px;
     }}
     p, ul, h3, h1 {{
-        font-weight: bolder !important;
         color: {selected_theme["text_color"]};
+        font-weight: 600 !important;
+    }}
+    strong {{
+        font-weight: 900 !important;
     }}
     .st-cb {{
         color: {selected_theme["text_color"]};
@@ -226,8 +235,9 @@ def new_round(mode):
     correct_album = st.session_state.lyrics.get_album_name()
     next_line = st.session_state.lyrics.get_next_line()
     prev_line = st.session_state.lyrics.get_previous_line()
+    section = st.session_state.lyrics.get_section()
 
-    return generated_lyrics, correct_song, correct_album, next_line, prev_line
+    return generated_lyrics, correct_song, correct_album, next_line, prev_line, section
 
 def end_current_game(): 
     if st.session_state.round_count:
@@ -277,29 +287,27 @@ def give_up(game_mode):
     st.session_state.lives -= 1
     st.session_state.streaks.append(st.session_state.streak)
     st.session_state.streak = 0
-    st.session_state.giveup_str = f"The correct answer was {st.session_state.correct_song}, from the album {st.session_state.correct_album}"        
+    st.session_state.giveup_str = f"The correct answer was **{st.session_state.correct_song}**, {st.session_state.correct_section}, from the album **{st.session_state.correct_album}**"        
     if game_mode == "Survival (with 3 lives)":
         st.session_state.giveup_str = st.session_state.giveup_str + f"\n\nYou lost a life and have {st.session_state.lives} lives left."
         if st.session_state.lives == 0: 
-            st.session_state.game_over_msg = f'**GAME OVER**: You ran out of lives! Please start a new game.\n\nThe correct answer was **{st.session_state.correct_song}**, from the album **{st.session_state.correct_album}**.'
+            st.session_state.game_over_msg = f'**GAME OVER**: You ran out of lives! Please start a new game.\n\nThe correct answer was **{st.session_state.correct_song}**, {st.session_state.correct_section}, from the album **{st.session_state.correct_album}**.'
             end_current_game()
             return
-    # container.error(msg, icon="🚨")
-    # container.button(":arrow_right: Next round", on_click=next_round)
 
 def add_hint(): 
     st.session_state.hint_count += 1
     st.session_state.points -= 1
     if st.session_state.hint_count == 1: 
-        st.session_state.hint_str += f"Hint 1: this song comes from the album {st.session_state.correct_album}"
+        st.session_state.hint_str += f"Hint 1: this song comes from the album **{st.session_state.correct_album}**"
     if st.session_state.hint_count == 2: 
-        st.session_state.hint_str += f'\n\nHint 2: the next line of this song is "{st.session_state.next_line}"'
+        st.session_state.hint_str += f'\n\nHint 2: the next line of this song is "*{st.session_state.next_line}*"'
     if st.session_state.hint_count == 3: 
         st.session_state.disable_hint_btn = True
-        st.session_state.hint_str += f'\n\nHint 3: the previous line of this song is "{st.session_state.prev_line}"'
+        st.session_state.hint_str += f'\n\nHint 3: the previous line of this song is "*{st.session_state.prev_line}*"'
 
 def answered_correctly(): 
-    st.session_state.correct_str = f"That is correct! The answer is indeed {st.session_state.correct_song}, from the album {st.session_state.correct_album}. Well done!"
+    st.session_state.correct_str = f"That is correct! The answer is indeed **{st.session_state.correct_song}**, {st.session_state.correct_section}, from the album **{st.session_state.correct_album}**. Well done!"
     st.session_state.points += points_mapping[mode]
     st.session_state.correct_rounds_count += 1
     st.session_state.guess = None
@@ -307,8 +315,7 @@ def answered_correctly():
     st.session_state.disable_giveup_btn = True
     st.session_state.disable_guess_input = True
     st.session_state.streak += 1
-
-    container.button(":arrow_right: Next round", on_click=next_round)
+    st.session_state.incorrect_str = ""
 
 def answered_incorrectly(game_mode): 
     st.session_state.incorrect_str = f'"{st.session_state.guess}" is not correct. Please try again!'
@@ -323,12 +330,10 @@ def answered_incorrectly(game_mode):
             st.session_state.disable_guess_input = True
             st.session_state.disable_giveup_btn = True
             st.session_state.disable_hint_btn = True
-            st.session_state.game_over_msg = f'"{st.session_state.guess}" is not correct.\n\n**GAME OVER**: You ran out of lives! Please start a new game.\n\nThe correct answer was **{st.session_state.correct_song}**, from the album **{st.session_state.correct_album}**.'
+            st.session_state.game_over_msg = f'"{st.session_state.guess}" is not correct.\n\n**GAME OVER**: You ran out of lives! Please start a new game.\n\nThe correct answer was **{st.session_state.correct_song}**, {st.session_state.correct_section}, from the album **{st.session_state.correct_album}**.'
             end_current_game()
             st.rerun()
-            return
-    # container.error(msg, icon="🚨")
-    
+            return    
 
 st.title("Welcome to :sparkles:tayLyrics:sparkles:!")
 
@@ -336,8 +341,7 @@ st.title("Welcome to :sparkles:tayLyrics:sparkles:!")
 with st.sidebar: 
     with st.expander(":pencil2: Instructions"): 
         st.markdown(f"Lyrics range from debut to *{all_albums[-1]}*.")
-        st.markdown(f':red[IMPORTANT: do NOT include "(Taylor\'s Version)" in your guesses; e.g. "Back to December (Taylor\'s Version)" should simply be "Back to December."]')
-        st.markdown(f':red[IMPORTANT: answer "All Too Well" for BOTH the 5-minute and 10-minute versions of All Too Well.]')
+        st.info('IMPORTANT: \n\nDo NOT include "(Taylor\'s Version)" in your guesses; e.g. "Back to December (Taylor\'s Version)" should simply be "Back to December."\n\nAnswer "All Too Well" for BOTH the 5-minute and 10-minute versions of All Too Well.', icon="ℹ️")
 
         selected_theme = st.radio("Select a theme",
                                   options=themes)
@@ -363,7 +367,7 @@ with st.sidebar:
 
 # MAIN PANEL #
 if (start_btn and len(selected_albums)) or st.session_state.next: 
-    st.session_state.generated_lyrics, st.session_state.correct_song, st.session_state.correct_album, st.session_state.next_line, st.session_state.prev_line = new_round(mode=mode)
+    st.session_state.generated_lyrics, st.session_state.correct_song, st.session_state.correct_album, st.session_state.next_line, st.session_state.prev_line, st.session_state.correct_section = new_round(mode=mode)
 
 container = st.container(border=True)
 with container: 
