@@ -53,9 +53,9 @@ theme_css = {
         "text_color": "white"
     },
     "Fearless": {
-        "background_color": "#E4C864", 
-        "button_color": "#BB9A4C",
-        "inputs": "#d9c78f",
+        "background_color": "BurlyWood", 
+        "button_color": "#D0B38E",
+        "inputs": "Wheat",
         "text_color": "black"
     }, 
     "Speak Now": {
@@ -168,6 +168,8 @@ if "correct_str" not in st.session_state:
     st.session_state.correct_str = ""
 if "incorrect_str" not in st.session_state: 
     st.session_state.incorrect_str = ""
+if "album_counter" not in st.session_state: 
+    st.session_state.album_counter = None
 
 def apply_theme(selected_theme):
     css = f"""
@@ -181,6 +183,7 @@ def apply_theme(selected_theme):
     .stApp {{
         background: {selected_theme['background_color']};
         color: {selected_theme["text_color"]};
+        font-family: "Helvetica", "Arial", sans-serif;
     }}
     button {{
         background-color: {selected_theme['button_color']} !important;
@@ -193,15 +196,22 @@ def apply_theme(selected_theme):
         color: {selected_theme["text_color"]};
         border-radius: 10px;
     }}
-    p, ul, h3, h1 {{
+    p, ul {{
         color: {selected_theme["text_color"]};
         font-weight: 600 !important;
     }}
-    strong {{
+    h3, h2, h1, strong, .lyrics {{
+        color: {selected_theme["text_color"]};
         font-weight: 900 !important;
+    }}
+    .lyrics {{
+        font-size: 18px;
     }}
     .st-cb {{
         color: {selected_theme["text_color"]};
+    }}
+    .st-gg {{
+        -webkit-text-fill-color: {selected_theme["text_color"]}
     }}
     [data-baseweb="tag"] {{
         background: {selected_theme['button_color']} !important;
@@ -210,6 +220,9 @@ def apply_theme(selected_theme):
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
+
+def reset_album_counter():
+    st.session_state.album_counter = {album_name: [] for album_name in st.session_state.albums}
 
 def guess_submitted():
     st.session_state.guess = st.session_state.widget
@@ -230,7 +243,7 @@ def new_round(mode):
     st.session_state.correct_str = ""
     st.session_state.incorrect_str = ""
 
-    generated_lyrics = st.session_state.lyrics.generate(mode)
+    generated_lyrics = f'<div class="lyrics">{st.session_state.lyrics.generate(mode)}</div>'
     correct_song = st.session_state.lyrics.get_track_name()
     correct_album = st.session_state.lyrics.get_album_name()
     next_line = st.session_state.lyrics.get_next_line()
@@ -275,6 +288,8 @@ def disable_start_button():
         filtered_lyrics = all_lyrics[all_lyrics["album_name"].isin(st.session_state.albums)].reset_index()
         st.session_state.lyrics = Lyrics(data=filtered_lyrics)
     
+    reset_album_counter()
+    
 
 def next_round(): 
     st.session_state.next = True
@@ -287,6 +302,7 @@ def give_up(game_mode):
     st.session_state.lives -= 1
     st.session_state.streaks.append(st.session_state.streak)
     st.session_state.streak = 0
+    st.session_state.album_counter[st.session_state.correct_album].append(False)
     st.session_state.giveup_str = f"The correct answer was **{st.session_state.correct_song}**, {st.session_state.correct_section}, from the album **{st.session_state.correct_album}**"        
     if game_mode == "Survival (with 3 lives)":
         st.session_state.giveup_str = st.session_state.giveup_str + f"\n\nYou lost a life and have {st.session_state.lives} lives left."
@@ -316,6 +332,7 @@ def answered_correctly():
     st.session_state.disable_guess_input = True
     st.session_state.streak += 1
     st.session_state.incorrect_str = ""
+    st.session_state.album_counter[st.session_state.correct_album].append(True)
 
 def answered_incorrectly(game_mode): 
     st.session_state.incorrect_str = f'"{st.session_state.guess}" is not correct. Please try again!'
@@ -356,17 +373,16 @@ with st.sidebar:
                                  options=gamemode_options,
                                  disabled=st.session_state.disable_start_btn)
         with st.expander("Advanced options"):
-            selected_albums = st.multiselect("Select albums to generate lyrics from", 
-                                             options=all_albums, 
-                                             default=all_albums, 
-                                             disabled=st.session_state.disable_start_btn, 
-                                             # on_change=albums_selected, 
-                                             key="albums")
+            st.multiselect("Select albums to generate lyrics from", 
+                            options=all_albums, 
+                            default=all_albums, 
+                            disabled=st.session_state.disable_start_btn, 
+                            key="albums")
         start_btn = st.form_submit_button(":large_green_square: Start new game", disabled=(st.session_state.disable_start_btn),
                                           on_click=disable_start_button)
 
 # MAIN PANEL #
-if (start_btn and len(selected_albums)) or st.session_state.next: 
+if (start_btn and len(st.session_state.albums)) or st.session_state.next: 
     st.session_state.generated_lyrics, st.session_state.correct_song, st.session_state.correct_album, st.session_state.next_line, st.session_state.prev_line, st.session_state.correct_section = new_round(mode=mode)
 
 container = st.container(border=True)
@@ -406,6 +422,12 @@ with container:
             st.markdown(st.session_state.past_game_scores)
         if st.session_state.game_over_msg:
             st.error(st.session_state.game_over_msg, icon="😢")
+        st.write(st.session_state.album_counter)
+        # option for leaderboard
+        if st.session_state.albums: 
+            with st.popover("Add to leaderboard"):
+                st.markdown(f"Save your results to the tayLyrics leaderboard!")
+                # TODO: text area. actual logistics of leaderboard
 
 st.sidebar.divider()
 with st.sidebar.container(border=True):
