@@ -3,8 +3,8 @@
 #### Server
 * Leaderboard - if all albums are selected, have the option for leaderboard in the Past Game Summary area. For simplicity you can do this w a CSV file, otherwise databases
     * As for actually integrating the Leaderboard into the UI, I'm thinking of separating the post-game container into 2 tabs; the past game stats tab and a leaderboard tab. The two tabs should only show after each game is ended, not when there is a game going on. The container should only contain the lyrics and the game interface during a game. In the leaderboard tab, the user should have the option of putting their scores into the leaderboard (database) under the (tentative) conditions that they 1) had all albums enabled, and 2) played at least x rounds (I'm thinking 20?). The leaderboard should be based on points out of total possible. Will have the user's name, date(time), and points of total possible.
+    * REMEMBER to have different leaderboards for survival vs casual mode!!!
 * Add seed-setting in advanced options so that generated lyrics are the same. Maybe there isn't a huge application but it would be fun if two people (e.g. me and Hannah) wanted to compete against each other
-* Would be fun to have more detailed stats on how well your game went by album - like a counter dict that counts up your accuracy by album
 * Check that the Mary's Song and I Can Fix Him issues have been resolved
 
 #### UI
@@ -22,6 +22,7 @@
 * Possibly consider changing fonts based on theme, but most likely I will just retain the same font for everything
 * More detailed instructions; talk abt capitalization and minor spelling errors
 * Consider putting the theme settings elsewhere, not in the Instructions expander but not in the form either bc then it won't go through until the button is clicked I believe
+* Put Giveup button next to Hint button; not below
 
 #### Data
 * TTPD appears to be non-explicit

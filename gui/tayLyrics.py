@@ -1,6 +1,7 @@
 import streamlit as st 
 import pandas as pd
 import numpy as np
+from time import gmtime, strftime
 
 from server_tools.Lyrics import Lyrics
 
@@ -173,6 +174,8 @@ if "album_counter" not in st.session_state:
     st.session_state.album_counter = None
 if "album_accs" not in st.session_state:
     st.session_state.album_accs = None
+if "enable_leaderboard" not in st.session_state:
+    st.session_state.enable_leaderboard = False
 
 def apply_theme(selected_theme):
     css = f"""
@@ -180,13 +183,16 @@ def apply_theme(selected_theme):
     .stApp > header {{
         background-color: transparent;
     }}
-    .eczjsme16 {{ 
-        background: {selected_theme['background_color']};
-    }}
     .stApp {{
         background: {selected_theme['background_color']};
         color: {selected_theme["text_color"]};
         font-family: "Helvetica", "Arial", sans-serif;
+    }}
+    button[data-baseweb="tab"] {{
+        background-color: transparent !important;
+    }}
+    [data-testid="stSidebar"] {{
+        background: {selected_theme['background_color']};
     }}
     button {{
         background-color: {selected_theme['button_color']} !important;
@@ -194,10 +200,10 @@ def apply_theme(selected_theme):
     button:disabled {{
         background-color: transparent !important;
     }}
-    .st-d8, .st-fg {{
-        background-color: {selected_theme['inputs']} !important;
+    div[data-baseweb="select"] > div, div[data-baseweb="base-input"] > input {{
+        background-color: {selected_theme["inputs"]};
         color: {selected_theme["text_color"]};
-        border-radius: 10px;
+        -webkit-text-fill-color: {selected_theme["text_color"]} !important;
     }}
     p, ul {{
         color: {selected_theme["text_color"]};
@@ -209,12 +215,6 @@ def apply_theme(selected_theme):
     }}
     .lyrics {{
         font-size: 18px;
-    }}
-    .st-cb {{
-        color: {selected_theme["text_color"]};
-    }}
-    .st-gg {{
-        -webkit-text-fill-color: {selected_theme["text_color"]}
     }}
     [data-baseweb="tag"] {{
         background: {selected_theme['button_color']} !important;
@@ -261,7 +261,7 @@ def end_current_game():
         accuracy_pct = round((st.session_state.correct_rounds_count / st.session_state.round_count), 2) * 100
         possible_pct = (st.session_state.points / (st.session_state.round_count * points_mapping[mode])) * 100
 
-        accs = {album: (round(sum(ls)/len(ls), 3) * 100, sum(ls), len(ls)) if len(ls) else (0, 0, 0) for album, ls in st.session_state.album_counter.items()}
+        accs = {album: (round(sum(ls) * 100/len(ls), 3), sum(ls), len(ls)) if len(ls) else (0, 0, 0) for album, ls in st.session_state.album_counter.items()}
         st.session_state.album_accs = dict(sorted(accs.items(), 
                                                   key=lambda x: (x[1][0], x[1][2], x[1][1]),
                                                   reverse=True))
@@ -277,9 +277,8 @@ def end_current_game():
     st.session_state.streaks = []
     st.session_state.disable_start_btn = False
     st.session_state.show_lyrics = False
-    st.session_state.points = 0
-    st.session_state.round_count = 0
-    st.session_state.correct_rounds_count = 0
+    # only allow user to add results to leaderboard if they've played 20+ rounds
+    st.session_state.enable_leaderboard = True if st.session_state.round_count >= 20 else False
     st.session_state.guess = ""
     st.session_state.hint_str = ""
     st.session_state.giveup_str = ""
@@ -298,7 +297,10 @@ def disable_start_button():
         st.session_state.lyrics = Lyrics(data=filtered_lyrics)
     
     reset_album_counter()
-    
+    st.session_state.round_count = 0
+    st.session_state.correct_rounds_count = 0
+    st.session_state.enable_leaderboard = False
+    st.session_state.points = 0
 
 def next_round(): 
     st.session_state.next = True
@@ -398,7 +400,9 @@ if (start_btn and len(st.session_state.albums)) or st.session_state.next:
 container = st.container(border=True)
 with container: 
     if st.session_state.show_lyrics:
+        st.write(f"<h4><u>Round {st.session_state.round_count}<u/></h4>", unsafe_allow_html=True)
         st.write(st.session_state.generated_lyrics, unsafe_allow_html=True)
+        st.text("")
         st.text_input("Enter your guess", 
                 placeholder="e.g. Back to December or Shake it Off", 
                 key="widget", on_change=guess_submitted,
@@ -426,17 +430,28 @@ with container:
             st.error(f"{st.session_state.giveup_str}", icon="🚨")
             container.button(":arrow_right: Next round", on_click=next_round)
     else: 
-        st.markdown('Click the "Start new game" button to start guessing!')
-        if st.session_state.past_game_scores: 
-            st.markdown("### Past Game Statistics")
-            st.markdown(st.session_state.past_game_scores)
-        if st.session_state.game_over_msg:
-            st.error(st.session_state.game_over_msg, icon="😢")
-        with st.expander("**Per-album accuracies**"):
-            s = ""
-            for album_name, tup in st.session_state.album_accs.items(): 
-                s += f"* {album_name}: {tup[0]}% ({tup[1]}/{tup[2]})\n"
-            st.markdown(s)
+        tab1, tab2 = st.tabs(["Game Statistics", "Leaderboard"])
+        with tab1:
+            st.markdown('Click the "Start new game" button to start guessing!')
+            if st.session_state.past_game_scores: 
+                st.markdown("### Past Game Statistics")
+                st.markdown(st.session_state.past_game_scores)
+            if st.session_state.game_over_msg:
+                st.error(st.session_state.game_over_msg, icon="😢")
+            if st.session_state.album_accs:
+                with st.expander("**Per-album accuracies**"):
+                    s = ""
+                    for album_name, tup in st.session_state.album_accs.items(): 
+                        s += f"* {album_name}: {tup[0]}% ({tup[1]}/{tup[2]})\n"
+                    st.markdown(s)
+        with tab2: 
+            st.markdown("### Leaderboard")
+            fake_leaderboard = pd.DataFrame({"Rank": [1], 
+                                             "Name": ["Jasmine"], 
+                                             "Datetime": [strftime("%Y-%m-%d %H:%M:%S", gmtime())],
+                                             "Accuracy": ["100% (18/18)"],
+                                             "Points of possible": ["18/18"]}).set_index("Rank")
+            st.dataframe(fake_leaderboard, use_container_width=True)
         # TODO: option for leaderboard
         # if st.session_state.albums: 
         #     with st.popover("Add to leaderboard"):
