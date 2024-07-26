@@ -1,5 +1,9 @@
 # tayLyrics
 
+**THIS README IS OUT-OF-DATE**
+
+I am currently working on a new version of the app. The link still functions fine; however, the info contained in the readme has not been updated yet.
+
 #### How well do you know Taylor Swift's lyrics? :D
 
 Lyrics from debut up to 1989 (Taylor's Version) are included. I will update this to include The Tortured Poet's Department as soon as I can!
@@ -30,15 +34,3 @@ Deductions:
 - Hint: -1pt per hint
 - Incorrect guess in any mode: -2pts
 - Giving up: -3pts (change this to -2pts)
-
-***
-
-#### TODO: 
-**NEW**
-* Implement survival/creative modes
-  * Survival would be that you get, say, 3 lives, and you try to get as many points as possible from that. You lose a life if you get an answer wrong.
-  * Creative would not have lives, just points
-* Not sure how to customize streamlit apps using CSS just yet, but it would be cool to have themes based on the albums. E.g. debut theme would be green and blue, red theme would be red, reputation theme would be black, etc. Just like the background color, text color, etc. 
-**Old but still worth exploring**
-* Adding non-album singles e.g. Only the Young, Christmas Tree Farm, but provide users with the option of removing them. Like a checkbox in the Advanced Options expander. 
-

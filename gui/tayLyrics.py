@@ -114,6 +114,7 @@ theme_css = {
     }
             }
 
+# TODO: initiate session state stuff via loop w/ list (exc. lyrics)
 if "lyrics" not in st.session_state: 
     st.session_state.lyrics = Lyrics(data=all_lyrics)
 if "generated_lyrics" not in st.session_state: 
@@ -170,6 +171,8 @@ if "incorrect_str" not in st.session_state:
     st.session_state.incorrect_str = ""
 if "album_counter" not in st.session_state: 
     st.session_state.album_counter = None
+if "album_accs" not in st.session_state:
+    st.session_state.album_accs = None
 
 def apply_theme(selected_theme):
     css = f"""
@@ -191,7 +194,7 @@ def apply_theme(selected_theme):
     button:disabled {{
         background-color: transparent !important;
     }}
-    .st-cr, .st-f5 {{
+    .st-d8, .st-fg {{
         background-color: {selected_theme['inputs']} !important;
         color: {selected_theme["text_color"]};
         border-radius: 10px;
@@ -221,6 +224,7 @@ def apply_theme(selected_theme):
     """
     st.markdown(css, unsafe_allow_html=True)
 
+# TODO: casual docstrings 
 def reset_album_counter():
     st.session_state.album_counter = {album_name: [] for album_name in st.session_state.albums}
 
@@ -256,6 +260,11 @@ def end_current_game():
     if st.session_state.round_count:
         accuracy_pct = round((st.session_state.correct_rounds_count / st.session_state.round_count), 2) * 100
         possible_pct = (st.session_state.points / (st.session_state.round_count * points_mapping[mode])) * 100
+
+        accs = {album: (round(sum(ls)/len(ls), 3) * 100, sum(ls), len(ls)) if len(ls) else (0, 0, 0) for album, ls in st.session_state.album_counter.items()}
+        st.session_state.album_accs = dict(sorted(accs.items(), 
+                                                  key=lambda x: (x[1][0], x[1][2], x[1][1]),
+                                                  reverse=True))
 
         st.session_state.past_game_scores = f"""
     {mode_mapping[mode]} difficulty, {st.session_state.round_count} rounds played
@@ -347,6 +356,7 @@ def answered_incorrectly(game_mode):
             st.session_state.disable_guess_input = True
             st.session_state.disable_giveup_btn = True
             st.session_state.disable_hint_btn = True
+            st.session_state.album_counter[st.session_state.correct_album].append(False)
             st.session_state.game_over_msg = f'"{st.session_state.guess}" is not correct.\n\n**GAME OVER**: You ran out of lives! Please start a new game.\n\nThe correct answer was **{st.session_state.correct_song}**, {st.session_state.correct_section}, from the album **{st.session_state.correct_album}**.'
             end_current_game()
             st.rerun()
@@ -422,12 +432,16 @@ with container:
             st.markdown(st.session_state.past_game_scores)
         if st.session_state.game_over_msg:
             st.error(st.session_state.game_over_msg, icon="😢")
-        st.write(st.session_state.album_counter)
-        # option for leaderboard
-        if st.session_state.albums: 
-            with st.popover("Add to leaderboard"):
-                st.markdown(f"Save your results to the tayLyrics leaderboard!")
-                # TODO: text area. actual logistics of leaderboard
+        with st.expander("**Per-album accuracies**"):
+            s = ""
+            for album_name, tup in st.session_state.album_accs.items(): 
+                s += f"* {album_name}: {tup[0]}% ({tup[1]}/{tup[2]})\n"
+            st.markdown(s)
+        # TODO: option for leaderboard
+        # if st.session_state.albums: 
+        #     with st.popover("Add to leaderboard"):
+        #         st.markdown(f"Save your results to the tayLyrics leaderboard!")
+        #         # TODO: text area. actual logistics of leaderboard
 
 st.sidebar.divider()
 with st.sidebar.container(border=True):
