@@ -1,11 +1,10 @@
+import re
 import streamlit as st 
 import pandas as pd
-import numpy as np
 from time import gmtime, strftime
 
 from server_tools.Lyrics import Lyrics
-
-# TODO: possibly add leaderboard? Only if all albums selected tho. some sort of database
+from server_tools.Leaderboard import Leaderboards
 
 # TODO: fix mistake in I Can Fix Him (No Really I Can) AND Mary's Song (Oh My My My)
 all_lyrics = pd.read_csv("/home/jasmine/tayLyrics_v2/tayLyrics/TAYLOR_LYRICS_JUN2024.csv")
@@ -133,7 +132,7 @@ if "prev_line" not in st.session_state:
 if "hint_count" not in st.session_state: 
     st.session_state.hint_count = 0
 if "guess" not in st.session_state: 
-    st.session_state.guess = False
+    st.session_state.guess = None
 if "show_lyrics" not in st.session_state: 
     st.session_state.show_lyrics = False
 if "disable_guess_input" not in st.session_state: 
@@ -176,6 +175,14 @@ if "album_accs" not in st.session_state:
     st.session_state.album_accs = None
 if "enable_leaderboard" not in st.session_state:
     st.session_state.enable_leaderboard = False
+if "accuracy" not in st.session_state:
+    st.session_state.accuracy = None
+if "points_of_possible" not in st.session_state:
+    st.session_state.points_of_possible = None
+if "disable_name_input" not in st.session_state: 
+    st.session_state.disable_name_input = False
+if "name" not in st.session_state: 
+    st.session_state.name = None
 
 def apply_theme(selected_theme):
     css = f"""
@@ -225,6 +232,21 @@ def apply_theme(selected_theme):
     st.markdown(css, unsafe_allow_html=True)
 
 # TODO: casual docstrings 
+def name_submitted():
+
+    st.session_state.disable_name_input = True
+
+    possible_pct = (st.session_state.points / (st.session_state.round_count * points_mapping[mode])) * 100
+    game_results = (st.session_state.leaderboard_name, st.session_state.round_count,
+                    st.session_state.points_of_possible,
+                    strftime("%Y-%m-%d %H:%M:%S", gmtime()),
+                    possible_pct)
+    with Leaderboards() as leaderboard:
+        leaderboard.add_to_leaderboard(st.session_state.difficulty, game_results)
+    
+    st.session_state.name = st.session_state.leaderboard_name
+    st.session_state.leaderboard_name = ""
+
 def reset_album_counter():
     st.session_state.album_counter = {album_name: [] for album_name in st.session_state.albums}
 
@@ -261,6 +283,9 @@ def end_current_game():
         accuracy_pct = round((st.session_state.correct_rounds_count / st.session_state.round_count), 2) * 100
         possible_pct = (st.session_state.points / (st.session_state.round_count * points_mapping[mode])) * 100
 
+        st.session_state.accuracy = f"{st.session_state.correct_rounds_count}/{st.session_state.round_count} ({accuracy_pct}%)"
+        st.session_state.points_of_possible = f"{st.session_state.points}/{st.session_state.round_count * points_mapping[mode]} ({round(possible_pct, 2)}%)"
+
         accs = {album: (round(sum(ls) * 100/len(ls), 3), sum(ls), len(ls)) if len(ls) else (0, 0, 0) for album, ls in st.session_state.album_counter.items()}
         st.session_state.album_accs = dict(sorted(accs.items(), 
                                                   key=lambda x: (x[1][0], x[1][2], x[1][1]),
@@ -268,8 +293,8 @@ def end_current_game():
 
         st.session_state.past_game_scores = f"""
     {mode_mapping[mode]} difficulty, {st.session_state.round_count} rounds played
-    * :dart: Accuracy: {st.session_state.correct_rounds_count}/{st.session_state.round_count} ({accuracy_pct}%)
-    * :100: Points out of total possible: {st.session_state.points}/{st.session_state.round_count * points_mapping[mode]} ({round(possible_pct, 2)}%)
+    * :dart: Accuracy: {st.session_state.accuracy}
+    * :100: Points out of total possible: {st.session_state.points_of_possible}
     * :fire: Max streak: {max(st.session_state.streaks) if len(st.session_state.streaks) else 0}
     * :moneybag: :green[Total points: {st.session_state.points}]
     """
@@ -277,8 +302,10 @@ def end_current_game():
     st.session_state.streaks = []
     st.session_state.disable_start_btn = False
     st.session_state.show_lyrics = False
-    # only allow user to add results to leaderboard if they've played 20+ rounds
-    st.session_state.enable_leaderboard = True if st.session_state.round_count >= 20 else False
+    # only allow user to add results to leaderboard if they've played 20+ rounds in survival mode w all albums
+    st.session_state.enable_leaderboard = True if (# (st.session_state.round_count >= 20) and 
+                                                   (st.session_state.game_mode == "Survival (with 3 lives)") and
+                                                   (len(st.session_state.albums) == len(all_albums))) else False
     st.session_state.guess = ""
     st.session_state.hint_str = ""
     st.session_state.giveup_str = ""
@@ -301,11 +328,15 @@ def disable_start_button():
     st.session_state.correct_rounds_count = 0
     st.session_state.enable_leaderboard = False
     st.session_state.points = 0
+    st.session_state.accuracy = "N/A (0%)"
+    st.session_state.points_of_possible = "N/A (0%)"
+    # st.session_state.guess = ""
+    st.session_state.disable_name_input = False
 
 def next_round(): 
     st.session_state.next = True
 
-def give_up(game_mode): 
+def give_up(): 
     st.session_state.disable_guess_input = True
     st.session_state.disable_giveup_btn = True
     st.session_state.disable_hint_btn = True
@@ -315,7 +346,7 @@ def give_up(game_mode):
     st.session_state.streak = 0
     st.session_state.album_counter[st.session_state.correct_album].append(False)
     st.session_state.giveup_str = f"The correct answer was **{st.session_state.correct_song}**, {st.session_state.correct_section}, from the album **{st.session_state.correct_album}**"        
-    if game_mode == "Survival (with 3 lives)":
+    if st.session_state.game_mode == "Survival (with 3 lives)":
         st.session_state.giveup_str = st.session_state.giveup_str + f"\n\nYou lost a life and have {st.session_state.lives} lives left."
         if st.session_state.lives == 0: 
             st.session_state.game_over_msg = f'**GAME OVER**: You ran out of lives! Please start a new game.\n\nThe correct answer was **{st.session_state.correct_song}**, {st.session_state.correct_section}, from the album **{st.session_state.correct_album}**.'
@@ -345,14 +376,14 @@ def answered_correctly():
     st.session_state.incorrect_str = ""
     st.session_state.album_counter[st.session_state.correct_album].append(True)
 
-def answered_incorrectly(game_mode): 
+def answered_incorrectly(): 
     st.session_state.incorrect_str = f'"{st.session_state.guess}" is not correct. Please try again!'
     st.session_state.points -= 1
     st.session_state.lives -= 1
     st.session_state.guess = None
     st.session_state.streaks.append(st.session_state.streak)
     st.session_state.streak = 0
-    if game_mode == "Survival (with 3 lives)":
+    if st.session_state.game_mode == "Survival (with 3 lives)":
         st.session_state.incorrect_str = st.session_state.incorrect_str + f"\n\nYou lost a life and have {st.session_state.lives} lives left."
         if st.session_state.lives == 0: 
             st.session_state.disable_guess_input = True
@@ -362,7 +393,6 @@ def answered_incorrectly(game_mode):
             st.session_state.game_over_msg = f'"{st.session_state.guess}" is not correct.\n\n**GAME OVER**: You ran out of lives! Please start a new game.\n\nThe correct answer was **{st.session_state.correct_song}**, {st.session_state.correct_section}, from the album **{st.session_state.correct_album}**.'
             end_current_game()
             st.rerun()
-            return    
 
 st.title("Welcome to :sparkles:tayLyrics:sparkles:!")
 
@@ -380,10 +410,12 @@ with st.sidebar:
     with start_form:
         mode = st.selectbox("Select a game difficulty", 
                             options=mode_options, 
-                            disabled=st.session_state.disable_start_btn)
-        game_mode = st.selectbox("Select a game mode", 
-                                 options=gamemode_options,
-                                 disabled=st.session_state.disable_start_btn)
+                            disabled=st.session_state.disable_start_btn,
+                            key="difficulty")
+        st.selectbox("Select a game mode", 
+                     options=gamemode_options,
+                     disabled=st.session_state.disable_start_btn,
+                     key="game_mode")
         with st.expander("Advanced options"):
             st.multiselect("Select albums to generate lyrics from", 
                             options=all_albums, 
@@ -411,12 +443,12 @@ with container:
             if st.session_state.lyrics.get_guess_feedback(st.session_state.guess): 
                 answered_correctly()
             else: 
-                answered_incorrectly(game_mode=game_mode)
+                answered_incorrectly()
         col1, col2, col3 = st.columns(3)
         hint_btn = col1.button(":bulb: Hint", on_click=add_hint, disabled=st.session_state.disable_hint_btn, 
                                help=hint_help)
-        giveup_btn = st.button(":no_entry: Give up", on_click=give_up, disabled=st.session_state.disable_giveup_btn,
-                               help="2 points are deducted from your total if you give up.", args=(game_mode,))
+        giveup_btn = col2.button(":no_entry: Give up", on_click=give_up, disabled=st.session_state.disable_giveup_btn,
+                               help="2 points are deducted from your total if you give up.")
         col3.button(":octagonal_sign: End current game", on_click=end_current_game, key="end_game")
         # TODO: may be a way to clean this up
         if st.session_state.hint_str:
@@ -446,23 +478,41 @@ with container:
                     st.markdown(s)
         with tab2: 
             st.markdown("### Leaderboard")
-            fake_leaderboard = pd.DataFrame({"Rank": [1], 
-                                             "Name": ["Jasmine"], 
-                                             "Datetime": [strftime("%Y-%m-%d %H:%M:%S", gmtime())],
-                                             "Accuracy": ["100% (18/18)"],
-                                             "Points of possible": ["18/18"]}).set_index("Rank")
-            st.dataframe(fake_leaderboard, use_container_width=True)
-        # TODO: option for leaderboard
-        # if st.session_state.albums: 
-        #     with st.popover("Add to leaderboard"):
-        #         st.markdown(f"Save your results to the tayLyrics leaderboard!")
-        #         # TODO: text area. actual logistics of leaderboard
+            if st.session_state.enable_leaderboard:
+                with st.popover(f"Add your results to the leaderboard"):
+                    st.text_input("Enter your name",
+                                  key="leaderboard_name",
+                                  disabled=st.session_state.disable_name_input,
+                                  on_change=name_submitted)
+                    # if name:
+                        # possible_pct = (st.session_state.points / (st.session_state.round_count * points_mapping[mode])) * 100
+                        # # possible_pct = float(re.search(r"\((\d+)%\)", 
+                        # #                             st.session_state.points_of_possible).group(1))
+                        # # (name, rounds, points_of_possible, datetime, points_of_possible_pct)
+                        # game_results = (name, st.session_state.round_count,
+                        #                 st.session_state.points_of_possible,
+                        #                 strftime("%Y-%m-%d %H:%M:%S", gmtime()),
+                        #                 possible_pct)
+                        # with Leaderboards() as leaderboard:
+                        #     leaderboard.add_to_leaderboard(st.session_state.difficulty, game_results)
+            else: 
+                st.markdown(f"Your game results can only be added to the leaderboard if you were in Survival mode with all albums enabled.")
+
+            with Leaderboards() as leaderboard:
+                current_leaderboards = leaderboard.get_leaderboards()
+            col1, col2 = st.columns(2)
+            board_to_show = col1.selectbox("Select leaderboard to display",
+                                         options=mode_options,
+                                         index=mode_options.index(st.session_state.difficulty))
+            board = current_leaderboards[board_to_show]
+            st.markdown(f"#### {board_to_show} Leaderboard")
+            st.dataframe(board, use_container_width=True)
 
 st.sidebar.divider()
 with st.sidebar.container(border=True):
     st.markdown("### Game Statistics")
-    st.markdown(f"**{mode_mapping[mode]} difficulty, {game_mode} mode**")
-
+    st.markdown(f"**{mode_mapping[mode]} difficulty, {st.session_state.game_mode} mode**")
+    st.write(f"round count {st.session_state.round_count}")
     if st.session_state.round_count: 
         st.markdown(f"* :large_green_circle: Round: {st.session_state.round_count}")
         accuracy_pct = round((st.session_state.correct_rounds_count / st.session_state.round_count), 2) * 100
@@ -471,5 +521,5 @@ with st.sidebar.container(border=True):
         st.markdown(f"* :100: Points out of total possible: {st.session_state.points}/{st.session_state.round_count * points_mapping[mode]} ({round(possible_pct, 2)}%)")
         st.markdown(f"* :fire: Current streak: {st.session_state.streak}")
         st.markdown(f"* :moneybag: :green[Total points: {st.session_state.points}]")
-    if game_mode == "Survival (with 3 lives)":
+    if st.session_state.game_mode == "Survival (with 3 lives)":
         st.markdown(f"* :space_invader: :red[Lives: {st.session_state.lives}]")

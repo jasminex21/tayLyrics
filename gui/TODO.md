@@ -26,6 +26,7 @@
 * Put Giveup button next to Hint button; not below
 * Create long name to short name mapping for albums so the names in the multiselect and in the album stats are simplified
 * Add hints used as a general stat
+* Put the end current game button elsewhere (more separate from the in-game buttons) bc at least for me I keep accidentally clicking it instead of give up
 
 #### Data
 * TTPD appears to be non-explicit
