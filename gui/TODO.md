@@ -4,8 +4,6 @@
 * Add seed-setting in advanced options so that generated lyrics are the same. Maybe there isn't a huge application but it would be fun if two people (e.g. me and Hannah) wanted to compete against each other
 * Check that the Mary's Song and I Can Fix Him issues have been resolved
 * To consider: add way to remove entry from leaderboard after it is added? Too much control tho and I'm not sure I like that.
-* [PRIORITY] Something is wrong with the lives again somehow. If I have 3 lives, and Ianswer incorrectly, and then give up, it takes up 3 lives (game overs) when it should only be 2. Happens for all modes. I am pretty sure this is bc guess is stored in session state, so it is entered twice (once correctly, the second after I click give up bc the app reloads and resubmits the wrong result) and since it's wrong it takes a life both times. The main way I would like to address this is to make the text input not submit on its own, but I don't think you can fully control that. 
-    * I have isolated the issue to the action of the giveup function. The lives are fine if I answer incorrectly twice in a row; it takes the proper amount of lives away.
 
 #### UI
 * Might be nice to have the Hint and Give Up buttons disappear after the user gives up or answers correctly. Key word might; play around w it

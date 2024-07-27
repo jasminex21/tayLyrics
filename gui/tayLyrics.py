@@ -416,6 +416,7 @@ def answered_incorrectly():
             st.session_state.game_over_msg = f'"{st.session_state.guess}" is not correct.\n\n**GAME OVER**: You ran out of lives! Please start a new game.\n\nThe correct answer was **{st.session_state.correct_song}**, {st.session_state.correct_section}, from the album **{st.session_state.correct_album}**.'
             end_current_game()
             st.rerun()
+    st.session_state.guess = None
 
 st.title("Welcome to :sparkles:tayLyrics:sparkles:!")
 
