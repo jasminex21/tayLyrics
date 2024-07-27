@@ -114,6 +114,8 @@ theme_css = {
     }
             }
 
+st.set_page_config(layout='wide')
+
 # TODO: initiate session state stuff via loop w/ list (exc. lyrics)
 if "lyrics" not in st.session_state: 
     st.session_state.lyrics = Lyrics(data=all_lyrics)
@@ -422,13 +424,11 @@ st.title("Welcome to :sparkles:tayLyrics:sparkles:!")
 
 # SIDEBAR #
 with st.sidebar: 
-    with st.expander(":pencil2: Instructions"): 
+    with st.expander(":pencil2: Instructions", expanded=True): 
         st.markdown(f"Lyrics range from debut to *{all_albums[-1]}*.")
-        st.info('IMPORTANT: \n\nDo NOT include "(Taylor\'s Version)" in your guesses; e.g. "Back to December (Taylor\'s Version)" should simply be "Back to December."\n\nAnswer "All Too Well" for BOTH the 5-minute and 10-minute versions of All Too Well.', icon="ℹ️")
-
-        selected_theme = st.radio("Select a theme",
-                                  options=themes)
-        apply_theme(theme_css[selected_theme])
+        st.markdown(f"Capitalization and minor spelling errors do NOT matter!")
+        st.markdown("### IMPORTANT GUIDELINES:")
+        st.markdown('* Do NOT include "(Taylor\'s Version)" in your guesses; e.g. "Back to December (Taylor\'s Version)" should simply be "Back to December."\n* Answer "All Too Well" for BOTH the 5-minute and 10-minute versions of All Too Well.')
 
     start_form = st.form("game_settings")
     with start_form:
@@ -449,94 +449,102 @@ with st.sidebar:
                             key="albums")
         start_btn = st.form_submit_button(":large_green_square: Start new game", disabled=(st.session_state.disable_start_btn),
                                           on_click=disable_start_button)
+        
+    with st.expander(":frame_with_picture: Themes"):
+
+        selected_theme = st.radio("Select a theme", options=themes)
+        apply_theme(theme_css[selected_theme])
 
 # MAIN PANEL #
 if (start_btn and len(st.session_state.albums)) or st.session_state.next: 
     st.session_state.generated_lyrics, st.session_state.correct_song, st.session_state.correct_album, st.session_state.next_line, st.session_state.prev_line, st.session_state.correct_section = new_round(mode=mode)
 
-container = st.container(border=True)
-with container: 
-    if st.session_state.show_lyrics:
-        st.write(f"<h4><u>Round {st.session_state.round_count}<u/></h4>", unsafe_allow_html=True)
-        st.write(st.session_state.generated_lyrics, unsafe_allow_html=True)
-        st.text("")
-        st.text_input("Enter your guess", 
-                placeholder="e.g. Back to December or Shake it Off", 
-                key="widget", on_change=guess_submitted,
-                disabled=st.session_state.disable_guess_input)
-        if st.session_state.guess: 
-            if st.session_state.lyrics.get_guess_feedback(st.session_state.guess): 
-                answered_correctly()
-            else: 
-                answered_incorrectly()
-        col1, col2, col3 = st.columns(3)
-        hint_btn = col1.button(":bulb: Hint", on_click=add_hint, disabled=st.session_state.disable_hint_btn, 
-                               help=hint_help)
-        giveup_btn = col2.button(":no_entry: Give up", on_click=give_up, disabled=st.session_state.disable_giveup_btn,
-                               help="2 points are deducted from your total if you give up.")
-        col3.button(":octagonal_sign: End current game", on_click=end_current_game, key="end_game")
+main_col, stats_col = st.columns([3, 2])
+if st.session_state.show_lyrics:
+    with main_col:
+        with st.container(border=True):
+            st.write(f"<h4><u>Round {st.session_state.round_count}<u/></h4>", unsafe_allow_html=True)
+            st.write(st.session_state.generated_lyrics, unsafe_allow_html=True)
+            st.text("")
+            st.text_input("Enter your guess", 
+                    placeholder="e.g. Back to December or Shake it Off", 
+                    key="widget", on_change=guess_submitted,
+                    disabled=st.session_state.disable_guess_input)
+            if st.session_state.guess: 
+                if st.session_state.lyrics.get_guess_feedback(st.session_state.guess): 
+                    answered_correctly()
+                else: 
+                    answered_incorrectly()
+            col1, col2, col3 = st.columns(3)
+            hint_btn = col1.button(":bulb: Hint", on_click=add_hint, disabled=st.session_state.disable_hint_btn, 
+                                help=hint_help)
+            giveup_btn = col2.button(":no_entry: Give up", on_click=give_up, disabled=st.session_state.disable_giveup_btn,
+                                help="2 points are deducted from your total if you give up.")
+            col3.button(":octagonal_sign: End current game", on_click=end_current_game, key="end_game")
 
-        if st.session_state.hint_str:
-            st.info(f"{st.session_state.hint_str}", icon="ℹ️")
-        if st.session_state.correct_str:
-            st.success(f"{st.session_state.correct_str}", icon="✅")
-            container.button(":arrow_right: Next round", on_click=next_round)
-        if st.session_state.incorrect_str:
-            st.error(f"{st.session_state.incorrect_str}", icon="🚨")
-        if st.session_state.giveup_str:
-            st.error(f"{st.session_state.giveup_str}", icon="🚨")
-            container.button(":arrow_right: Next round", on_click=next_round)
-    else: 
-        tab1, tab2 = st.tabs(["Game Statistics", "Leaderboard"])
-        with tab1:
-            st.markdown('Click the "Start new game" button to start guessing!')
-            if st.session_state.past_game_scores: 
-                st.markdown("### Past Game Statistics")
-                st.markdown(st.session_state.past_game_scores)
-            if st.session_state.game_over_msg:
-                st.error(st.session_state.game_over_msg, icon="😢")
-            if st.session_state.album_accs:
-                with st.expander("**Per-album accuracies**"):
-                    s = ""
-                    for album_name, tup in st.session_state.album_accs.items(): 
-                        s += f"* {album_name}: {tup[0]}% ({tup[1]}/{tup[2]})\n"
-                    st.markdown(s)
-        with tab2: 
-            st.markdown("### Leaderboard")
-            if st.session_state.enable_leaderboard:
-                with st.popover(f"Add your results to the leaderboard"):
-                    st.text_input("Enter your name",
-                                  key="leaderboard_name",
-                                  disabled=st.session_state.disable_name_input,
-                                  on_change=name_submitted)
-                st.markdown(st.session_state.rank_msg)
-            else: 
-                st.markdown(f"Your game results can only be added to the leaderboard if you were in Survival mode with all albums enabled.")
+            if st.session_state.hint_str:
+                st.info(f"{st.session_state.hint_str}", icon="ℹ️")
+            if st.session_state.correct_str:
+                st.success(f"{st.session_state.correct_str}", icon="✅")
+                st.button(":arrow_right: Next round", on_click=next_round)
+            if st.session_state.incorrect_str:
+                st.error(f"{st.session_state.incorrect_str}", icon="🚨")
+            if st.session_state.giveup_str:
+                st.error(f"{st.session_state.giveup_str}", icon="🚨")
+                st.button(":arrow_right: Next round", on_click=next_round)
+            
+        with stats_col:
+            with st.container(border=True):
+                st.markdown("### Game Statistics")
+                st.markdown(f"**{mode_mapping[mode]} difficulty, {st.session_state.game_mode} mode**")
+                if st.session_state.round_count: 
+                    st.markdown(f"* :large_green_circle: Round: {st.session_state.round_count}")
+                    accuracy_pct = round((st.session_state.correct_rounds_count / st.session_state.round_count), 2) * 100
+                    st.markdown(f"* :dart: Accuracy: {st.session_state.correct_rounds_count}/{st.session_state.round_count} ({accuracy_pct}%)")
+                    possible_pct = (st.session_state.points / (st.session_state.round_count * points_mapping[mode])) * 100
+                    st.markdown(f"* :100: Points out of total possible: {st.session_state.points}/{st.session_state.round_count * points_mapping[mode]} ({round(possible_pct, 2)}%)")
+                    st.markdown(f"* :fire: Current streak: {st.session_state.streak}")
+                    st.markdown(f"* :moneybag: :green[Total points: {st.session_state.points}]")
+                if st.session_state.game_mode == "Survival (with 3 lives)":
+                    st.markdown(f"* :space_invader: :red[Lives: {st.session_state.lives}]")
+else: 
+    b1, c, b2 = st.columns([1, 5, 1])
+    with c:
+        with st.container(border=True):
+            tab1, tab2 = st.tabs(["Game Statistics", "Leaderboard"])
+            with tab1:
+                st.markdown('Click the "Start new game" button to start guessing!')
+                if st.session_state.past_game_scores: 
+                    st.markdown("### Past Game Statistics")
+                    st.markdown(st.session_state.past_game_scores)
+                if st.session_state.game_over_msg:
+                    st.error(st.session_state.game_over_msg, icon="😢")
+                if st.session_state.album_accs:
+                    with st.expander("**Per-album accuracies**"):
+                        s = ""
+                        for album_name, tup in st.session_state.album_accs.items(): 
+                            s += f"* {album_name}: {tup[0]}% ({tup[1]}/{tup[2]})\n"
+                        st.markdown(s)
+            with tab2: 
+                st.markdown("### Leaderboard")
+                if st.session_state.enable_leaderboard:
+                    with st.popover(f"Add your results to the leaderboard"):
+                        st.text_input("Enter your name",
+                                    key="leaderboard_name",
+                                    disabled=st.session_state.disable_name_input,
+                                    on_change=name_submitted)
+                    st.markdown(st.session_state.rank_msg)
+                else: 
+                    st.markdown(f"Your game results can only be added to the leaderboard if you were in Survival mode with all albums enabled.")
 
-            with Leaderboards() as leaderboard:
-                current_leaderboards = leaderboard.get_leaderboards()
-                
-            col1, col2 = st.columns(2)
-            board_to_show = col1.selectbox("Select leaderboard to display",
-                                         options=mode_options,
-                                         index=mode_options.index(st.session_state.difficulty))
-            board = current_leaderboards[board_to_show]
-            board = board.style.apply(highlight_new_row, axis=1)
-            st.markdown(f"#### {board_to_show} Leaderboard")
-            st.dataframe(board, use_container_width=True)
-
-st.sidebar.divider()
-with st.sidebar.container(border=True):
-    st.markdown("### Game Statistics")
-    st.markdown(f"**{mode_mapping[mode]} difficulty, {st.session_state.game_mode} mode**")
-    st.write(f"round count {st.session_state.round_count}")
-    if st.session_state.round_count: 
-        st.markdown(f"* :large_green_circle: Round: {st.session_state.round_count}")
-        accuracy_pct = round((st.session_state.correct_rounds_count / st.session_state.round_count), 2) * 100
-        st.markdown(f"* :dart: Accuracy: {st.session_state.correct_rounds_count}/{st.session_state.round_count} ({accuracy_pct}%)")
-        possible_pct = (st.session_state.points / (st.session_state.round_count * points_mapping[mode])) * 100
-        st.markdown(f"* :100: Points out of total possible: {st.session_state.points}/{st.session_state.round_count * points_mapping[mode]} ({round(possible_pct, 2)}%)")
-        st.markdown(f"* :fire: Current streak: {st.session_state.streak}")
-        st.markdown(f"* :moneybag: :green[Total points: {st.session_state.points}]")
-    if st.session_state.game_mode == "Survival (with 3 lives)":
-        st.markdown(f"* :space_invader: :red[Lives: {st.session_state.lives}]")
+                with Leaderboards() as leaderboard:
+                    current_leaderboards = leaderboard.get_leaderboards()
+                    
+                col1, col2 = st.columns(2)
+                board_to_show = col1.selectbox("Select leaderboard to display",
+                                            options=mode_options,
+                                            index=mode_options.index(st.session_state.difficulty))
+                board = current_leaderboards[board_to_show]
+                board = board.style.apply(highlight_new_row, axis=1)
+                st.markdown(f"#### {board_to_show} Leaderboard")
+                st.dataframe(board, use_container_width=True)
