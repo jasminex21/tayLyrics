@@ -2,11 +2,8 @@
 
 #### Server
 * Add seed-setting in advanced options so that generated lyrics are the same. Maybe there isn't a huge application but it would be fun if two people (e.g. me and Hannah) wanted to compete against each other
-* Check that the Mary's Song and I Can Fix Him issues have been resolved
-* To consider: add way to remove entry from leaderboard after it is added? Too much control tho and I'm not sure I like that.
 
 #### UI
-* Might be nice to have the Hint and Give Up buttons disappear after the user gives up or answers correctly. Key word might; play around w it
 * Go through all the themes and correct any that may be too harsh on the eye
     * Make SN background color a darker shade of purple
     * Make Red BG darker/duller
@@ -15,20 +12,16 @@
     * Test black text with folklore
 * Figure out how to grey out the buttons when they are disabled - they used to be fine but with the theming it goes away
     * Got the greyed out part (made the buttons transparent) but the text stays the same color. Would be nice to change text to grey
-* Make sure the error/success/etc messages show up fine w each theme
 * The red IMPORTANT text in the instructions is kind of blinding for certain themes. Same w the green text for total points. See if you can change that based on theme or just use a different color overall that works for all themes
 * Possibly consider changing fonts based on theme, but most likely I will just retain the same font for everything
-* More detailed instructions; talk abt capitalization and minor spelling errors
-* Consider putting the theme settings elsewhere, not in the Instructions expander but not in the form either bc then it won't go through until the button is clicked I believe
-* Put Giveup button next to Hint button; not below
-* Create long name to short name mapping for albums so the names in the multiselect and in the album stats are simplified
-* Maybe move the Game Statistics to a column within the main panel, not in sidebar. Like a narrow column, and make sure that wide mode is enabled for the app so the lyrics have enough room.
 * The success and error message backgrounds are kind of hard to see for some themes. See if you can either adjust the themes, or make changes to the success/error message background colors
-* Possibly change the color of the dataframe, but not needed; looks fine as is.
+* Possibly change the color of the dataframe, but not needed; looks fine as is
+* Add a "Created w/ love by jasminex21" thingie somewhere (probably bottom of sidebar) and link to GitHub repo
 
 #### Data
 * TTPD appears to be non-explicit
 * Add non-album singles to the dataset (album = Non-Album Single) and provide the option of filtering them out
+    * This would require restructuring and probably re-writing most of the data-pulling pipeline (it is quite messy now since it's old)
 * [LOW PRIORITY] Add data-pulling pipeline to a folder, maybe something like .../data. Is still in R, probably won't change that
 
 #### Testing and General

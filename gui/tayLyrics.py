@@ -45,6 +45,8 @@ themes = ["Debut",
           "evermore",
           "Midnights",
           "TTPD"]
+album_mapping = {long:short for long, short in zip(all_albums, themes)}
+inv_map = {short:long for long, short in album_mapping.items()}
 theme_css = {
     "Debut": {
         "background_color": "#006767",
@@ -220,16 +222,17 @@ def apply_theme(selected_theme):
         color: {selected_theme["text_color"]};
         -webkit-text-fill-color: {selected_theme["text_color"]} !important;
     }}
-    p, ul {{
+    p, ul, li {{
         color: {selected_theme["text_color"]};
         font-weight: 600 !important;
+        font-size: large !important;
     }}
-    h3, h2, h1, strong, .lyrics {{
+    h3, h2, h1, strong, .lyrics, h4 {{
         color: {selected_theme["text_color"]};
         font-weight: 900 !important;
     }}
     .lyrics {{
-        font-size: 18px;
+        font-size: 20px;
     }}
     [data-baseweb="tag"] {{
         background: {selected_theme['button_color']} !important;
@@ -272,7 +275,9 @@ def highlight_new_row(row):
         return [''] * len(row)
 
 def reset_album_counter():
-    st.session_state.album_counter = {album_name: [] for album_name in st.session_state.albums}
+
+    # selected_albums = [album_mapping[long] for long in st.session_state.albums]
+    st.session_state.album_counter = {str(album_name): [] for album_name in st.session_state.albums}
 
 def guess_submitted():
     st.session_state.guess = st.session_state.widget
@@ -342,8 +347,8 @@ def disable_start_button():
     else: 
         st.session_state.disable_start_btn = True
         st.session_state.lives = 3
-
-        filtered_lyrics = all_lyrics[all_lyrics["album_name"].isin(st.session_state.albums)].reset_index()
+        selected_albums = [inv_map[short] for short in st.session_state.albums]
+        filtered_lyrics = all_lyrics[all_lyrics["album_name"].isin(selected_albums)].reset_index()
         st.session_state.lyrics = Lyrics(data=filtered_lyrics)
     
     reset_album_counter()
@@ -369,7 +374,8 @@ def give_up():
     st.session_state.lives -= 1
     st.session_state.streaks.append(st.session_state.streak)
     st.session_state.streak = 0
-    st.session_state.album_counter[st.session_state.correct_album].append(False)
+    correct_album = album_mapping[st.session_state.correct_album]
+    st.session_state.album_counter[correct_album].append(False)
     st.session_state.giveup_str = f"The correct answer was **{st.session_state.correct_song}**, {st.session_state.correct_section}, from the album **{st.session_state.correct_album}**"        
     if st.session_state.game_mode == "Survival (with 3 lives)":
         st.session_state.giveup_str = st.session_state.giveup_str + f"\n\nYou lost a life and have {st.session_state.lives} lives left."
@@ -400,7 +406,8 @@ def answered_correctly():
     st.session_state.disable_guess_input = True
     st.session_state.streak += 1
     st.session_state.incorrect_str = ""
-    st.session_state.album_counter[st.session_state.correct_album].append(True)
+    correct_album = album_mapping[st.session_state.correct_album]
+    st.session_state.album_counter[correct_album].append(True)
 
 def answered_incorrectly(): 
     st.session_state.incorrect_str = f'"{st.session_state.guess}" is not correct. Please try again!'
@@ -414,7 +421,8 @@ def answered_incorrectly():
             st.session_state.disable_guess_input = True
             st.session_state.disable_giveup_btn = True
             st.session_state.disable_hint_btn = True
-            st.session_state.album_counter[st.session_state.correct_album].append(False)
+            correct_album = album_mapping[st.session_state.correct_album]
+            st.session_state.album_counter[correct_album].append(False)
             st.session_state.game_over_msg = f'"{st.session_state.guess}" is not correct.\n\n**GAME OVER**: You ran out of lives! Please start a new game.\n\nThe correct answer was **{st.session_state.correct_song}**, {st.session_state.correct_section}, from the album **{st.session_state.correct_album}**.'
             end_current_game()
             st.rerun()
@@ -443,10 +451,10 @@ with st.sidebar:
                      key="game_mode")
         with st.expander("Advanced options"):
             st.multiselect("Select albums to generate lyrics from", 
-                            options=all_albums, 
-                            default=all_albums, 
-                            disabled=st.session_state.disable_start_btn, 
-                            key="albums")
+                           options=[album_mapping[long] for long in all_albums],
+                           default=[album_mapping[long] for long in all_albums], 
+                           disabled=st.session_state.disable_start_btn, 
+                           key="albums")
         start_btn = st.form_submit_button(":large_green_square: Start new game", disabled=(st.session_state.disable_start_btn),
                                           on_click=disable_start_button)
         
@@ -475,12 +483,12 @@ if st.session_state.show_lyrics:
                     answered_correctly()
                 else: 
                     answered_incorrectly()
-            col1, col2, col3 = st.columns(3)
+            col1, col2, col3, col4 = st.columns([1.5, 3, 1, 1])
             hint_btn = col1.button(":bulb: Hint", on_click=add_hint, disabled=st.session_state.disable_hint_btn, 
                                 help=hint_help)
             giveup_btn = col2.button(":no_entry: Give up", on_click=give_up, disabled=st.session_state.disable_giveup_btn,
                                 help="2 points are deducted from your total if you give up.")
-            col3.button(":octagonal_sign: End current game", on_click=end_current_game, key="end_game")
+            # col4.button(":octagonal_sign: End current game", on_click=end_current_game, key="end_game")
 
             if st.session_state.hint_str:
                 st.info(f"{st.session_state.hint_str}", icon="ℹ️")
@@ -492,6 +500,8 @@ if st.session_state.show_lyrics:
             if st.session_state.giveup_str:
                 st.error(f"{st.session_state.giveup_str}", icon="🚨")
                 st.button(":arrow_right: Next round", on_click=next_round)
+        col1, col2, col4 = st.columns(3)
+        col4.button(":octagonal_sign: End current game", on_click=end_current_game, key="end_game")
             
         with stats_col:
             with st.container(border=True):
@@ -546,5 +556,5 @@ else:
                                             index=mode_options.index(st.session_state.difficulty))
                 board = current_leaderboards[board_to_show]
                 board = board.style.apply(highlight_new_row, axis=1)
-                st.markdown(f"#### {board_to_show} Leaderboard")
+                st.markdown(f"#### {mode_mapping[board_to_show]} Leaderboard")
                 st.dataframe(board, use_container_width=True)
