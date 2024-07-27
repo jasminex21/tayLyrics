@@ -183,6 +183,12 @@ if "disable_name_input" not in st.session_state:
     st.session_state.disable_name_input = False
 if "name" not in st.session_state: 
     st.session_state.name = None
+if "datetime" not in st.session_state: 
+    st.session_state.datetime = "n/a"
+if "hints_used" not in st.session_state: 
+    st.session_state.hints_used = 0
+if "rank_msg" not in st.session_state: 
+    st.session_state.rank_msg = ""
 
 def apply_theme(selected_theme):
     css = f"""
@@ -235,17 +241,33 @@ def apply_theme(selected_theme):
 def name_submitted():
 
     st.session_state.disable_name_input = True
-
+    st.session_state.datetime = strftime("%Y-%m-%d %H:%M:%S", gmtime())
     possible_pct = (st.session_state.points / (st.session_state.round_count * points_mapping[mode])) * 100
     game_results = (st.session_state.leaderboard_name, st.session_state.round_count,
                     st.session_state.points_of_possible,
-                    strftime("%Y-%m-%d %H:%M:%S", gmtime()),
+                    st.session_state.datetime,
                     possible_pct)
     with Leaderboards() as leaderboard:
         leaderboard.add_to_leaderboard(st.session_state.difficulty, game_results)
+        current_leaderboards = leaderboard.get_leaderboards()
     
     st.session_state.name = st.session_state.leaderboard_name
     st.session_state.leaderboard_name = ""
+
+    mode_options.index(st.session_state.difficulty)
+    added_to_df = current_leaderboards[board_to_show]
+    filtered_row = added_to_df[added_to_df["Datetime"].astype(str) == str(st.session_state.datetime)]
+    added_rank = int(filtered_row.index[0])
+    out_of = added_to_df.shape[0]
+
+    st.session_state.rank_msg = f"Your game results were added to the leaderboard!\nYou ranked in position {added_rank} out of {out_of} total results."
+
+def highlight_new_row(row):
+
+    if str(row["Datetime"]) == str(st.session_state.datetime):
+        return ['background-color: #0D460D'] * len(row)
+    else:
+        return [''] * len(row)
 
 def reset_album_counter():
     st.session_state.album_counter = {album_name: [] for album_name in st.session_state.albums}
@@ -295,6 +317,7 @@ def end_current_game():
     {mode_mapping[mode]} difficulty, {st.session_state.round_count} rounds played
     * :dart: Accuracy: {st.session_state.accuracy}
     * :100: Points out of total possible: {st.session_state.points_of_possible}
+    * :bulb: Hints used: {st.session_state.hints_used}
     * :fire: Max streak: {max(st.session_state.streaks) if len(st.session_state.streaks) else 0}
     * :moneybag: :green[Total points: {st.session_state.points}]
     """
@@ -302,9 +325,7 @@ def end_current_game():
     st.session_state.streaks = []
     st.session_state.disable_start_btn = False
     st.session_state.show_lyrics = False
-    # only allow user to add results to leaderboard if they've played 20+ rounds in survival mode w all albums
-    st.session_state.enable_leaderboard = True if (# (st.session_state.round_count >= 20) and 
-                                                   (st.session_state.game_mode == "Survival (with 3 lives)") and
+    st.session_state.enable_leaderboard = True if ((st.session_state.game_mode == "Survival (with 3 lives)") and
                                                    (len(st.session_state.albums) == len(all_albums))) else False
     st.session_state.guess = ""
     st.session_state.hint_str = ""
@@ -330,8 +351,10 @@ def disable_start_button():
     st.session_state.points = 0
     st.session_state.accuracy = "N/A (0%)"
     st.session_state.points_of_possible = "N/A (0%)"
-    # st.session_state.guess = ""
     st.session_state.disable_name_input = False
+    st.session_state.hints_used = 0
+    st.session_state.datetime = "n/a"
+    st.session_state.rank_msg = ""
 
 def next_round(): 
     st.session_state.next = True
@@ -355,6 +378,7 @@ def give_up():
 
 def add_hint(): 
     st.session_state.hint_count += 1
+    st.session_state.hints_used += 1
     st.session_state.points -= 1
     if st.session_state.hint_count == 1: 
         st.session_state.hint_str += f"Hint 1: this song comes from the album **{st.session_state.correct_album}**"
@@ -380,7 +404,6 @@ def answered_incorrectly():
     st.session_state.incorrect_str = f'"{st.session_state.guess}" is not correct. Please try again!'
     st.session_state.points -= 1
     st.session_state.lives -= 1
-    st.session_state.guess = None
     st.session_state.streaks.append(st.session_state.streak)
     st.session_state.streak = 0
     if st.session_state.game_mode == "Survival (with 3 lives)":
@@ -408,6 +431,7 @@ with st.sidebar:
 
     start_form = st.form("game_settings")
     with start_form:
+        st.markdown(f"### Start New Game")
         mode = st.selectbox("Select a game difficulty", 
                             options=mode_options, 
                             disabled=st.session_state.disable_start_btn,
@@ -450,7 +474,7 @@ with container:
         giveup_btn = col2.button(":no_entry: Give up", on_click=give_up, disabled=st.session_state.disable_giveup_btn,
                                help="2 points are deducted from your total if you give up.")
         col3.button(":octagonal_sign: End current game", on_click=end_current_game, key="end_game")
-        # TODO: may be a way to clean this up
+
         if st.session_state.hint_str:
             st.info(f"{st.session_state.hint_str}", icon="ℹ️")
         if st.session_state.correct_str:
@@ -484,27 +508,19 @@ with container:
                                   key="leaderboard_name",
                                   disabled=st.session_state.disable_name_input,
                                   on_change=name_submitted)
-                    # if name:
-                        # possible_pct = (st.session_state.points / (st.session_state.round_count * points_mapping[mode])) * 100
-                        # # possible_pct = float(re.search(r"\((\d+)%\)", 
-                        # #                             st.session_state.points_of_possible).group(1))
-                        # # (name, rounds, points_of_possible, datetime, points_of_possible_pct)
-                        # game_results = (name, st.session_state.round_count,
-                        #                 st.session_state.points_of_possible,
-                        #                 strftime("%Y-%m-%d %H:%M:%S", gmtime()),
-                        #                 possible_pct)
-                        # with Leaderboards() as leaderboard:
-                        #     leaderboard.add_to_leaderboard(st.session_state.difficulty, game_results)
+                st.markdown(st.session_state.rank_msg)
             else: 
                 st.markdown(f"Your game results can only be added to the leaderboard if you were in Survival mode with all albums enabled.")
 
             with Leaderboards() as leaderboard:
                 current_leaderboards = leaderboard.get_leaderboards()
+                
             col1, col2 = st.columns(2)
             board_to_show = col1.selectbox("Select leaderboard to display",
                                          options=mode_options,
                                          index=mode_options.index(st.session_state.difficulty))
             board = current_leaderboards[board_to_show]
+            board = board.style.apply(highlight_new_row, axis=1)
             st.markdown(f"#### {board_to_show} Leaderboard")
             st.dataframe(board, use_container_width=True)
 

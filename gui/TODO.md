@@ -1,12 +1,11 @@
 ### TODO
 
 #### Server
-* Leaderboard - if all albums are selected, have the option for leaderboard in the Past Game Summary area. For simplicity you can do this w a CSV file, otherwise databases
-    * As for actually integrating the Leaderboard into the UI, I'm thinking of separating the post-game container into 2 tabs; the past game stats tab and a leaderboard tab. The two tabs should only show after each game is ended, not when there is a game going on. The container should only contain the lyrics and the game interface during a game. In the leaderboard tab, the user should have the option of putting their scores into the leaderboard (database) under the (tentative) conditions that they 1) had all albums enabled, and 2) played at least x rounds (I'm thinking 20?). The leaderboard should be based on points out of total possible. Will have the user's name, date(time), and points of total possible.
-    * REMEMBER to have different leaderboards for survival vs casual mode!!!
-         * Regarding the above point - it might be better to only have a leaderboard for survival mode. Casual mode is too unrestricted. Would have to have a separate leaderboard for easy, medium, and hard modes. Once the user ends the game and the tab shows up, it should default to the leaderboard specific to the game settings they just played, but there will also be a dropdown so they can view other leaderboards. If in casual mode, make sure there is an info message or something saying leaderboard is only for survival mode, but of course they can view the leaderboards still. 
 * Add seed-setting in advanced options so that generated lyrics are the same. Maybe there isn't a huge application but it would be fun if two people (e.g. me and Hannah) wanted to compete against each other
 * Check that the Mary's Song and I Can Fix Him issues have been resolved
+* To consider: add way to remove entry from leaderboard after it is added? Too much control tho and I'm not sure I like that.
+* [PRIORITY] Something is wrong with the lives again somehow. If I have 3 lives, and Ianswer incorrectly, and then give up, it takes up 3 lives (game overs) when it should only be 2. Happens for all modes. I am pretty sure this is bc guess is stored in session state, so it is entered twice (once correctly, the second after I click give up bc the app reloads and resubmits the wrong result) and since it's wrong it takes a life both times. The main way I would like to address this is to make the text input not submit on its own, but I don't think you can fully control that. 
+    * I have isolated the issue to the action of the giveup function. The lives are fine if I answer incorrectly twice in a row; it takes the proper amount of lives away.
 
 #### UI
 * Might be nice to have the Hint and Give Up buttons disappear after the user gives up or answers correctly. Key word might; play around w it
@@ -25,8 +24,9 @@
 * Consider putting the theme settings elsewhere, not in the Instructions expander but not in the form either bc then it won't go through until the button is clicked I believe
 * Put Giveup button next to Hint button; not below
 * Create long name to short name mapping for albums so the names in the multiselect and in the album stats are simplified
-* Add hints used as a general stat
-* Put the end current game button elsewhere (more separate from the in-game buttons) bc at least for me I keep accidentally clicking it instead of give up
+* Maybe move the Game Statistics to a column within the main panel, not in sidebar. Like a narrow column, and make sure that wide mode is enabled for the app so the lyrics have enough room.
+* The success and error message backgrounds are kind of hard to see for some themes. See if you can either adjust the themes, or make changes to the success/error message background colors
+* Possibly change the color of the dataframe, but not needed; looks fine as is.
 
 #### Data
 * TTPD appears to be non-explicit
