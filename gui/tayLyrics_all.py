@@ -706,7 +706,8 @@ with st.sidebar:
         
     with st.expander(":frame_with_picture: Themes"):
 
-        selected_theme = st.radio("Select a theme", options=themes)
+        selected_theme = st.radio("Select a theme", options=themes,
+                                  index=themes.index("Midnights"))
         apply_theme(theme_css[selected_theme])
     
     st.divider()
@@ -772,7 +773,7 @@ else:
         with st.container(border=True):
             tab1, tab2 = st.tabs(["Game Statistics", "Leaderboard"])
             with tab1:
-                st.markdown('Click the "Start new game" button to start guessing!')
+                st.markdown('Click the "Start new game" in the sidebar button to start guessing!')
                 if st.session_state.past_game_scores: 
                     st.markdown("### Past Game Statistics")
                     st.markdown(st.session_state.past_game_scores)
@@ -788,6 +789,9 @@ else:
                 st.markdown("### Leaderboard")
                 if st.session_state.enable_leaderboard:
                     with st.popover(f"Add your results to the leaderboard"):
+                        st.markdown("#### Add your results")
+                        possible_pct = round((st.session_state.points / (st.session_state.round_count * points_mapping[mode])) * 100, 2)
+                        st.markdown(f"Scores to be added: (Round count {st.session_state.round_count}, Points of possible {possible_pct})")
                         st.text_input("Enter your name",
                                     key="leaderboard_name",
                                     disabled=st.session_state.disable_name_input,

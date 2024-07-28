@@ -10,7 +10,6 @@
 * TTPD appears to be non-explicit
 * Add non-album singles to the dataset (album = Non-Album Single) and provide the option of filtering them out
     * This would require restructuring and probably re-writing most of the data-pulling pipeline (it is quite messy now since it's old)
-* [LOW PRIORITY] Add data-pulling pipeline to a folder, maybe something like .../data. Is still in R, probably won't change that
 
 #### Testing and General
 * Make sure the game works fine. Play it a ton and keep track of any possible mistakes 
