@@ -2,8 +2,18 @@ import pandas as pd
 import sqlite3
 
 class Leaderboards:
+    """
+    A class that manages leaderboards via a SQLite database. 
 
-    def __init__(self, db_path="/home/jasmine/tayLyrics_v2/tayLyrics/leaderboard.db"):
+    Args: 
+        db_path: The path to the database.
+    """
+
+    def __init__(self, db_path="leaderboard.db"):
+
+        """
+        Constructor
+        """
 
         self.db_path = db_path
         self.table_names = [f"leaderboard_{diff}" for diff in ["easy", "medium", "hard"]]
@@ -12,6 +22,10 @@ class Leaderboards:
                                    "Hard (1 line)": "hard"}
 
     def __enter__(self):
+        """
+        Connects the database and creates the leaderboards for each
+        difficulty if they do not already exist.
+        """
 
         self.connection = sqlite3.connect(self.db_path)
         self.cursor = self.connection.cursor()
@@ -19,10 +33,17 @@ class Leaderboards:
         return self
     
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        Automatically closes the database connection.
+        """
 
         self.connection.close()
 
     def create_tables(self):
+        """
+        Method that creates the three leaderboards (one for each difficulty) if
+        they do not already exist.
+        """
         
         for table_name in self.table_names:
             create_query = f"""CREATE TABLE IF NOT EXISTS {table_name} (
@@ -36,6 +57,16 @@ class Leaderboards:
             self.connection.commit()
     
     def add_to_leaderboard(self, difficulty, results):
+        """
+        Method that adds a user's results to the corresponding leaderboard.
+
+        Args: 
+            difficulty: A string specifying the game difficulty; this 
+                        determines which leaderboard the results are added to.
+
+            results: A tuple (name, rounds, points_of_possible, datetime, 
+                     points_of_possible_pct) containing the user's game results.
+        """
         
         db_difficulty = self.difficulty_mapping[difficulty]
         add_query = f"""INSERT INTO leaderboard_{db_difficulty} (name, rounds, points_of_possible, datetime, points_of_possible_pct)
@@ -44,6 +75,14 @@ class Leaderboards:
         self.connection.commit()
 
     def get_leaderboards(self):
+        """
+        Method that returns the most updated leaderboards, each ranked by the
+        number of rounds the users have played.
+
+        Returns: 
+            A dictionary containing the leaderboards (as pandas dataframes) 
+            for each difficulty.
+        """
 
         all_leaderboards = {}
         columns = ["ID", "Name", "Rounds", "Points of possible", "Datetime", "Points of Possible pct."]
@@ -55,6 +94,7 @@ class Leaderboards:
 
             df = pd.DataFrame(rows, columns=columns)
             df["Datetime"] = pd.to_datetime(df["Datetime"])
+            # the primary determinator of rank is the number of rounds
             df = df.sort_values(by=["Rounds", 'Points of Possible pct.', "Datetime"], ascending=[False, False, True])
             df["Rank"] = df[["Rounds"]].rank(method="first", ascending=False).astype(int)
             final_df = df[final_cols].set_index("Rank")

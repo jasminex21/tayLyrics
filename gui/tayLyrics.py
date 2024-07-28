@@ -243,7 +243,6 @@ def apply_theme(selected_theme):
     """
     st.markdown(css, unsafe_allow_html=True)
 
-# TODO: casual docstrings 
 def name_submitted():
 
     st.session_state.disable_name_input = True

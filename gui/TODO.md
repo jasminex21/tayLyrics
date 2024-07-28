@@ -1,7 +1,6 @@
 ### TODO
 
 #### Server
-* [PRIORITY] What to do with first and last line of DATASET - will result in key error if trying to get the next line
 * Add seed-setting in advanced options so that generated lyrics are the same. Maybe there isn't a huge application but it would be fun if two people (e.g. me and Hannah) wanted to compete against each other
 
 #### UI
