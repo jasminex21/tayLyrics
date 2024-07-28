@@ -1,4 +1,4 @@
 streamlit
 pandas
 stringdist
--e ./server_tools
+-e ./servertools
