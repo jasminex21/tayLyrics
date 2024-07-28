@@ -4,15 +4,6 @@
 * Add seed-setting in advanced options so that generated lyrics are the same. Maybe there isn't a huge application but it would be fun if two people (e.g. me and Hannah) wanted to compete against each other
 
 #### UI
-* Go through all the themes and correct any that may be too harsh on the eye
-    * Make SN background color a darker shade of purple
-    * Make Red BG darker/duller
-    * Make 1989 duller, and change button colors (too much contrast; maybe go for a grey or blue)
-    * Make Lover inputs darker; too bright
-    * Test black text with folklore
-* Figure out how to grey out the buttons when they are disabled - they used to be fine but with the theming it goes away
-    * Got the greyed out part (made the buttons transparent) but the text stays the same color. Would be nice to change text to grey
-* The red IMPORTANT text in the instructions is kind of blinding for certain themes. Same w the green text for total points. See if you can change that based on theme or just use a different color overall that works for all themes
 * Possibly consider changing fonts based on theme, but most likely I will just retain the same font for everything
 * The success and error message backgrounds are kind of hard to see for some themes. See if you can either adjust the themes, or make changes to the success/error message background colors
 * Possibly change the color of the dataframe, but not needed; looks fine as is

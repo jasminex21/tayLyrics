@@ -6,7 +6,6 @@ from time import gmtime, strftime
 from server_tools.Lyrics import Lyrics
 from server_tools.Leaderboard import Leaderboards
 
-# TODO: fix mistake in I Can Fix Him (No Really I Can) AND Mary's Song (Oh My My My)
 all_lyrics = pd.read_csv("/home/jasmine/tayLyrics_v2/tayLyrics/TAYLOR_LYRICS_JUN2024.csv")
 all_albums = ["Taylor Swift", 
               "Fearless (Taylor's Version)",
@@ -33,7 +32,6 @@ hint_help = """You get 3 hints per round; Hint 1 gives the album,
                respectively. Each hint deducts 1 point from your total."""
 gamemode_options = ["Casual (no lives)", 
                     "Survival (with 3 lives)"]
-# TODO: preliminary theme names - add emojis and fonts later!
 themes = ["Debut", 
           "Fearless", 
           "Speak Now", 
@@ -61,21 +59,21 @@ theme_css = {
         "text_color": "black"
     }, 
     "Speak Now": {
-        "background_color": "#8B698E",
-        "button_color": "#86469C",
-        "inputs": "#BB9AB1",
+        "background_color": "#836485",
+        "button_color": "#7B4E7E",
+        "inputs": "#B693B8",
         "text_color": "white"
     },
     "Red": {
-        "background_color": "#7D2727",
-        "button_color": "#755B48",
-        "inputs": "#5F2020",
+        "background_color": "#712929",
+        "button_color": "#5F2020",
+        "inputs": "#984747",
         "text_color": "white"
     },
     "1989": {
-        "background_color": "#8A96AE",
-        "button_color": "#ccc4c2",
-        "inputs": "#748CA9",
+        "background_color": "#858EA0",
+        "button_color": "#787E89",
+        "inputs": "#B1BCD0",
         "text_color": "black"
     },
     "reputation": {
@@ -85,16 +83,16 @@ theme_css = {
         "text_color": "white"
     }, 
     "Lover": {
-        "background_color": "#D39DA9",
-        "button_color": "#CC7CA3",
-        "inputs": "#FCBDC4",
+        "background_color": "#BB919B",
+        "button_color": "#DD8B9F",
+        "inputs": "#DBABB7",
         "text_color": "black"
     }, 
     "folklore": {
         "background_color": "#7f7f7f",
         "button_color": "#616161",
-        "inputs": "#353535",
-        "text_color": "white"
+        "inputs": "#999999",
+        "text_color": "black"
     },
     "evermore": {
         "background_color": "#643325",
@@ -110,7 +108,7 @@ theme_css = {
     },
     "TTPD": {
         "background_color": "#a79e8f",
-        "button_color": "#6f6a66",
+        "button_color": "#7D776E",
         "inputs": "#9A9181",
         "text_color": "black"
     }
@@ -276,7 +274,6 @@ def highlight_new_row(row):
 
 def reset_album_counter():
 
-    # selected_albums = [album_mapping[long] for long in st.session_state.albums]
     st.session_state.album_counter = {str(album_name): [] for album_name in st.session_state.albums}
 
 def guess_submitted():
@@ -326,7 +323,7 @@ def end_current_game():
     * :100: Points out of total possible: {st.session_state.points_of_possible}
     * :bulb: Hints used: {st.session_state.hints_used}
     * :fire: Max streak: {max(st.session_state.streaks) if len(st.session_state.streaks) else 0}
-    * :moneybag: :green[Total points: {st.session_state.points}]
+    * :moneybag: Total points: {st.session_state.points}
     """
     st.session_state.streak = 0
     st.session_state.streaks = []
@@ -462,6 +459,10 @@ with st.sidebar:
 
         selected_theme = st.radio("Select a theme", options=themes)
         apply_theme(theme_css[selected_theme])
+    
+    st.divider()
+    st.markdown(f"Made with :heart: by Jasmine Xu")
+    st.markdown(f"Contact me at <jasminexu@utexas.edu>")
 
 # MAIN PANEL #
 if (start_btn and len(st.session_state.albums)) or st.session_state.next: 
@@ -488,7 +489,6 @@ if st.session_state.show_lyrics:
                                 help=hint_help)
             giveup_btn = col2.button(":no_entry: Give up", on_click=give_up, disabled=st.session_state.disable_giveup_btn,
                                 help="2 points are deducted from your total if you give up.")
-            # col4.button(":octagonal_sign: End current game", on_click=end_current_game, key="end_game")
 
             if st.session_state.hint_str:
                 st.info(f"{st.session_state.hint_str}", icon="ℹ️")
@@ -514,9 +514,9 @@ if st.session_state.show_lyrics:
                     possible_pct = (st.session_state.points / (st.session_state.round_count * points_mapping[mode])) * 100
                     st.markdown(f"* :100: Points out of total possible: {st.session_state.points}/{st.session_state.round_count * points_mapping[mode]} ({round(possible_pct, 2)}%)")
                     st.markdown(f"* :fire: Current streak: {st.session_state.streak}")
-                    st.markdown(f"* :moneybag: :green[Total points: {st.session_state.points}]")
+                    st.markdown(f"* :moneybag: Total points: {st.session_state.points}")
                 if st.session_state.game_mode == "Survival (with 3 lives)":
-                    st.markdown(f"* :space_invader: :red[Lives: {st.session_state.lives}]")
+                    st.markdown(f"* :space_invader: Lives: {st.session_state.lives}")
 else: 
     b1, c, b2 = st.columns([1, 5, 1])
     with c:
