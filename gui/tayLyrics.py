@@ -333,7 +333,8 @@ def end_current_game():
     st.session_state.disable_start_btn = False
     st.session_state.show_lyrics = False
     st.session_state.enable_leaderboard = True if ((st.session_state.game_mode == "Survival (with 3 lives)") and
-                                                   (len(st.session_state.albums) == len(all_albums))) else False
+                                                   (len(st.session_state.albums) == len(all_albums)) and
+                                                   (st.session_state.round_count >= 5)) else False
     st.session_state.guess = ""
     st.session_state.hint_str = ""
     st.session_state.giveup_str = ""

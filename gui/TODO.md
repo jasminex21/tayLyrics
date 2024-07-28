@@ -4,7 +4,6 @@
 * Add seed-setting in advanced options so that generated lyrics are the same. Maybe there isn't a huge application but it would be fun if two people (e.g. me and Hannah) wanted to compete against each other
 
 #### UI
-* Possibly consider changing fonts based on theme, but most likely I will just retain the same font for everything
 * The success and error message backgrounds are kind of hard to see for some themes. See if you can either adjust the themes, or make changes to the success/error message background colors
 
 #### Data

@@ -1,9 +1,11 @@
 # ✨tayLyrics✨
 
 ### 📃 About 
-tayLyrics is a lyrics-guessing game that aims to assess how well you - a preseumtive Swiftie - know Taylor Swift's lyrics. The app generates a lyric and your goal is to guess the song it comes from.
+tayLyrics is a lyrics-guessing game that aims to assess how well you - a presumptive Swiftie - know Taylor Swift's lyrics. The app generates a lyric and your goal is to guess the song it comes from.
 
 As of July 2024, tayLyrics is updated to contain lyrics up to and including *THE TORTURED POETS DEPARTMENT*, as well as all Taylor's Version albums and vault tracks.
+
+[Here](https://taylyrics.streamlit.app/) is the link to the game. Good luck and have fun!
 
 ![alt text](image.png)
 
