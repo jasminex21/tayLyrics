@@ -5,8 +5,8 @@ from time import gmtime, strftime
 from servertools.Lyrics import Lyrics
 from servertools.Leaderboard import Leaderboards
 
-# all_lyrics = pd.read_csv("/home/jasmine/tayLyrics_v2/tayLyrics/TAYLOR_LYRICS_JUN2024.csv")
-all_lyrics = pd.read_csv("TAYLOR_LYRICS_JUN2024.csv")
+all_lyrics = pd.read_csv("/home/jasmine/tayLyrics_v2/tayLyrics/TAYLOR_LYRICS_JUN2024.csv")
+# all_lyrics = pd.read_csv("TAYLOR_LYRICS_JUN2024.csv")
 all_albums = ["Taylor Swift", 
               "Fearless (Taylor's Version)",
               "Speak Now (Taylor's Version)", 
@@ -211,6 +211,7 @@ def apply_theme(selected_theme):
     }}
     [data-testid="stSidebar"] {{
         background: {selected_theme['background_color']};
+        width: 500px !important;
     }}
     button {{
         background-color: {selected_theme['button_color']} !important;
@@ -432,7 +433,7 @@ st.title("Welcome to :sparkles:tayLyrics:sparkles:!")
 # SIDEBAR #
 with st.sidebar: 
     with st.expander(":pencil2: Instructions", expanded=True): 
-        st.markdown(f"Lyrics range from debut to *{all_albums[-1]}*.")
+        st.markdown(f"Lyrics range from debut to *{all_albums[-1]}*. All Taylor's Version vault tracks are included!")
         st.markdown(f"Capitalization and minor spelling errors do NOT matter!")
         st.markdown("### IMPORTANT GUIDELINES:")
         st.markdown('* Do NOT include "(Taylor\'s Version)" in your guesses; e.g. "Back to December (Taylor\'s Version)" should simply be "Back to December."\n* Answer "All Too Well" for BOTH the 5-minute and 10-minute versions of All Too Well.')
