@@ -1,4 +1,3 @@
-import re
 import streamlit as st 
 import pandas as pd
 from time import gmtime, strftime
@@ -6,7 +5,8 @@ from time import gmtime, strftime
 from server_tools.Lyrics import Lyrics
 from server_tools.Leaderboard import Leaderboards
 
-all_lyrics = pd.read_csv("/home/jasmine/tayLyrics_v2/tayLyrics/TAYLOR_LYRICS_JUN2024.csv")
+# all_lyrics = pd.read_csv("/home/jasmine/tayLyrics_v2/tayLyrics/TAYLOR_LYRICS_JUN2024.csv")
+all_lyrics = pd.read_csv("TAYLOR_LYRICS_JUN2024.csv")
 all_albums = ["Taylor Swift", 
               "Fearless (Taylor's Version)",
               "Speak Now (Taylor's Version)", 
@@ -114,7 +114,10 @@ theme_css = {
     }
             }
 
-st.set_page_config(layout='wide')
+st.set_page_config(layout='wide',
+                   page_title="tayLyrics",
+                   page_icon=":sparkles:",
+                   menu_items={'About': "#### tayLyrics: A fun little lyrics guessing game for Swifties"})
 
 # TODO: initiate session state stuff via loop w/ list (exc. lyrics)
 if "lyrics" not in st.session_state: 

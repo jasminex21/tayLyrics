@@ -1,12 +1,8 @@
 import pandas as pd
 import random
-import time
 import math
 import re
 import stringdist
-
-data = pd.read_csv("/home/jasmine/tayLyrics_v2/tayLyrics/TAYLOR_LYRICS_JUN2024.csv")
-
 class Lyrics(): 
 
     def __init__(self, data):
