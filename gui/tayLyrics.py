@@ -2,8 +2,8 @@ import streamlit as st
 import pandas as pd
 from time import gmtime, strftime
 
-from server_tools.Lyrics import Lyrics
-from server_tools.Leaderboard import Leaderboards
+from servertools.Lyrics import Lyrics
+from servertools.Leaderboard import Leaderboards
 
 # all_lyrics = pd.read_csv("/home/jasmine/tayLyrics_v2/tayLyrics/TAYLOR_LYRICS_JUN2024.csv")
 all_lyrics = pd.read_csv("TAYLOR_LYRICS_JUN2024.csv")
