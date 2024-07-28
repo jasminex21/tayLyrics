@@ -1,36 +1,31 @@
-# tayLyrics
+# ✨tayLyrics✨
 
-**THIS README IS OUT-OF-DATE**
+### 📃 About 
+tayLyrics is a lyrics-guessing game that aims to assess how well you - a preseumtive Swiftie - know Taylor Swift's lyrics. The app generates a lyric and your goal is to guess the song it comes from.
 
-I am currently working on a new version of the app. The link still functions fine; however, the info contained in the readme has not been updated yet.
+As of July 2024, tayLyrics is updated to contain lyrics up to and including *THE TORTURED POETS DEPARTMENT*, as well as all Taylor's Version albums and vault tracks.
 
-#### How well do you know Taylor Swift's lyrics? :D
+![alt text](image.png)
 
-Lyrics from debut up to 1989 (Taylor's Version) are included. I will update this to include The Tortured Poet's Department as soon as I can!
+### ⚔️ The Game
+tayLyrics has 3 difficulty levels: Easy generates a whole section of lyrics (e.g. the entire chorus), Medium generates 2 lines, and Hard generates 1 line. You earn points for each lyric you guess correctly; the higher the difficulty, the more points you get.
 
-This is still a work in progress, but for entertainment purposes, [here](https://jasminex21.shinyapps.io/tayLyrics/) is the link to the game. 
+If you don't have a guess, you can ask for a hint - there are three hints available for each generated lyric. These hints yield the lyric's album, next line, and previous line, respectively. Or, you could also choose to give up and move on to the next round. But keep in mind that getting hints and giving up will cost you points!
 
-***
+You can choose to play in Casual (unlimited lives) or Survival (3 lives) mode. In the latter, the stakes are upped - any time you answer incorrectly or give up, you lose a life. Your goal is to make it as many rounds as you can without losing all 3 of your lives, while also making sure not to use too many hints, because those will cost you points. 
 
-#### Here is the general layout of the app: 
+If you play in Survival mode and have all albums enabled in the Advanced Options, you can choose to record your game scores in the leaderboard and see how you match up with other Swifties!
 
-![image](https://github.com/jasminex21/tayLyrics/assets/109494334/01621c73-7a5e-408a-be70-5b0d38dd8e9d)
-![image](https://github.com/jasminex21/tayLyrics/assets/109494334/44d053e0-99c0-445e-9ca7-69aa110b64fd)
-
-
-Instructions are provided on the left sidebar, as needed. 
-
-***
-
-#### Points breakdown:
-*Subject to change*
+#### Points breakdown
 
 Additions: 
-- Correct guess in easy mode: +2pt
-- Correct guess in medium mode: +6pts
-- Correct guess in hard mode: +8pts
 
-Deductions: 
-- Hint: -1pt per hint
-- Incorrect guess in any mode: -2pts
-- Giving up: -3pts (change this to -2pts)
+* Easy correct guess: +1
+* Medium correct guess: +3
+* Hard correct guess: +5
+
+Deductions:
+
+* Hint: -1
+* Incorrect guess: -1
+* Giving up: -2
