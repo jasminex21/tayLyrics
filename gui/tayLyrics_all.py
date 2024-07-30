@@ -362,7 +362,8 @@ theme_css = {
 st.set_page_config(layout='wide',
                    page_title="tayLyrics",
                    page_icon=":sparkles:",
-                   menu_items={'About': "#### tayLyrics: A fun little lyrics guessing game for Swifties"})
+                   menu_items={'About': "#### tayLyrics: A lyrics-guessing game for Swifties",
+                               "Report a bug": "mailto:jasminexu@utexas.edu"})
 
 # TODO: initiate session state stuff via loop w/ list (exc. lyrics)
 if "lyrics" not in st.session_state: 
@@ -773,7 +774,7 @@ else:
         with st.container(border=True):
             tab1, tab2 = st.tabs(["Game Statistics", "Leaderboard"])
             with tab1:
-                st.markdown('Click the "Start new game" in the sidebar button to start guessing!')
+                st.markdown('Click the "Start new game" button in the sidebar to start guessing!')
                 if st.session_state.past_game_scores: 
                     st.markdown("### Past Game Statistics")
                     st.markdown(st.session_state.past_game_scores)
@@ -791,14 +792,14 @@ else:
                     with st.popover(f"Add your results to the leaderboard"):
                         st.markdown("#### Add your results")
                         possible_pct = round((st.session_state.points / (st.session_state.round_count * points_mapping[mode])) * 100, 2)
-                        st.markdown(f"Scores to be added: (Round count {st.session_state.round_count}, Points of possible {possible_pct})")
+                        st.markdown(f"Scores to be added: (Round count {st.session_state.round_count}, Points of possible {st.session_state.points}/{st.session_state.round_count * points_mapping[mode]} ({round(possible_pct, 2)}%))")
                         st.text_input("Enter your name",
                                     key="leaderboard_name",
                                     disabled=st.session_state.disable_name_input,
                                     on_change=name_submitted)
                     st.markdown(st.session_state.rank_msg)
                 else: 
-                    st.markdown(f"Your game results can only be added to the leaderboard if you were in Survival mode with all albums enabled.")
+                    st.markdown(f"Your game results can only be added to the leaderboard if you played 5+ rounds in Survival mode with all albums enabled.")
 
                 with Leaderboards() as leaderboard:
                     current_leaderboards = leaderboard.get_leaderboards()
