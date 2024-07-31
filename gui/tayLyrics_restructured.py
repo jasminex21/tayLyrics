@@ -254,7 +254,7 @@ def game_started(difficulty, game_mode, albums):
     st.session_state.album_counter = {album_name: [] for album_name in st.session_state.albums}
     st.session_state.enable_leaderboard = False
     st.session_state.disable_name_input = False
-    st.session_state.datetime = None
+    st.session_state.submitted_datetime = None
     st.session_state.rank_msg = ""
 
 def new_round():
@@ -374,14 +374,14 @@ def end_game():
 def name_submitted():
     
     st.session_state.disable_name_input = True
-    st.session_state.datetime = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+    st.session_state.submitted_datetime = strftime("%Y-%m-%d %H:%M:%S", gmtime())
 
     possible_pct = round(st.session_state.points * 100 / (st.session_state.round_count * POINTS_MAPPING[st.session_state.difficulty]), 2)
     possible_str = f"{st.session_state.points}/{st.session_state.round_count * POINTS_MAPPING[st.session_state.difficulty]} ({possible_pct}%)"
 
     game_results = (st.session_state.leaderboard_name, st.session_state.round_count,
                     possible_str,
-                    st.session_state.datetime,
+                    st.session_state.submitted_datetime,
                     possible_pct)
     
     # clear the name input text box
@@ -393,7 +393,7 @@ def name_submitted():
         current_leaderboards = leaderboard.get_leaderboards()
 
     added_to_df = current_leaderboards[st.session_state.difficulty]
-    filtered_row = added_to_df[added_to_df["Datetime"].astype(str) == str(st.session_state.datetime)]
+    filtered_row = added_to_df[added_to_df["Datetime"].astype(str) == str(st.session_state.submitted_datetime)]
     added_rank = int(filtered_row.index[0])
     out_of = added_to_df.shape[0]
 
@@ -402,7 +402,7 @@ def name_submitted():
 
 def highlight_new_row(row):
     """Highlights the row that was just added to the leaderboard in green"""
-    if str(row["Datetime"]) == str(st.session_state.datetime):
+    if str(row["Datetime"]) == str(st.session_state.submitted_datetime):
         return ['background-color: #0D460D'] * len(row)
     else:
         return [''] * len(row)
@@ -535,4 +535,19 @@ else:
             col1, col2, col4 = st.columns(3)
             col4.button(":octagonal_sign: End current game", on_click=end_game, key="end_game")
 
-## TODO: the current game stats
+        with stats_tab:
+            st.markdown(f"### In-Game Statistics")
+            st.markdown(f"**{DIFFICULTY_MAPPING[st.session_state.difficulty]} difficulty, {st.session_state.game_mode} mode**")
+            st.markdown(f"* :large_green_circle: Round: {st.session_state.round_count}")
+
+            accuracy_pct = round((sum(st.session_state.round_results) * 100 /st.session_state.round_count), 2)
+            possible_pct = round(st.session_state.points * 100 / (st.session_state.round_count * POINTS_MAPPING[st.session_state.difficulty]), 2)
+            accuracy_str = f"{sum(st.session_state.round_results)}/{st.session_state.round_count} ({accuracy_pct}%)"
+            possible_str = f"{st.session_state.points}/{st.session_state.round_count * POINTS_MAPPING[st.session_state.difficulty]} ({possible_pct}%)"
+            
+            st.markdown(f"* :dart: Accuracy: {accuracy_str}")
+            st.markdown(f"* :100: Points out of total possible: {possible_str}")
+            st.markdown(f"* :fire: Current streak: {st.session_state.streak}")
+            st.markdown(f"* :moneybag: Total points: {st.session_state.points}")
+            if st.session_state.game_mode == "Survival (with 3 lives)":
+                st.markdown(f"* :space_invader: Lives: {st.session_state.lives}")
