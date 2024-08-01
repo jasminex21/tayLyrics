@@ -4,6 +4,7 @@ from time import gmtime, strftime
 import random
 import math
 import re
+import os
 import stringdist
 import sqlite3
 
@@ -701,13 +702,16 @@ def name_submitted():
 
     st.session_state.rank_msg = f"Your game results were added to the leaderboard!\nYou ranked in position {added_rank} out of {out_of} total results."
 
-
 def highlight_new_row(row):
     """Highlights the row that was just added to the leaderboard in green"""
     if str(row["Datetime (UTC)"]) == str(st.session_state.submitted_datetime):
         return ['background-color: #0D460D'] * len(row)
     else:
         return [''] * len(row)
+
+def get_database(path="leaderboard.db"):
+    with open(path, "rb") as f:
+        return f.read()
 
 ### UI ###
 with st.sidebar:
@@ -721,6 +725,16 @@ with st.sidebar:
     st.divider()
     st.markdown(f"Made with :heart: by Jasmine Xu")
     st.markdown(f"Contact me at <jasminexu@utexas.edu>")
+
+    if os.path.exists("leaderboard.db"):
+
+        st.divider()
+
+        db = get_database()
+        st.download_button(label="Download leaderboard",
+                        data=db,
+                        file_name="leaderboard.db",
+                        mime="application/octet-stream")
 
 
 buffer1, main_col, buffer2 = st.columns([1, 3, 1])
@@ -819,7 +833,7 @@ with main_col:
             shown_leaderboard = current_leaderboards[leaderboard_to_show]
             shown_leaderboard = shown_leaderboard.style.apply(highlight_new_row, axis=1)
             st.markdown(f"### {DIFFICULTY_MAPPING[leaderboard_to_show]} Leaderboard")
-            st.dataframe(shown_leaderboard, use_container_width=True)
+            st.table(shown_leaderboard) #, use_container_width=True)
 
     if st.session_state.start_btn_clicked:
         game_started()

@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import pandas as pd
 from time import strftime, gmtime
@@ -460,6 +461,10 @@ def highlight_new_row(row):
         return ['background-color: #0D460D'] * len(row)
     else:
         return [''] * len(row)
+    
+def get_database(path="leaderboard.db"):
+    with open(path, "rb") as f:
+        return f.read()
 
 ### UI ###
 with st.sidebar:
@@ -473,6 +478,16 @@ with st.sidebar:
     st.divider()
     st.markdown(f"Made with :heart: by Jasmine Xu")
     st.markdown(f"Contact me at <jasminexu@utexas.edu>")
+
+    if os.path.exists("leaderboard.db"):
+
+        st.divider()
+        
+        db = get_database()
+        st.download_button(label="Download leaderboard",
+                        data=db,
+                        file_name="leaderboard.db",
+                        mime="application/octet-stream")
 
 
 buffer1, main_col, buffer2 = st.columns([1, 3, 1])
