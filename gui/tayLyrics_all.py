@@ -350,7 +350,8 @@ THEME_CSS = {
         "text_color": "black"}}
 
 ### PAGE CONFIG
-st.set_page_config(page_title="tayLyrics",
+st.set_page_config(layout='wide',
+                   page_title="tayLyrics",
                    page_icon=":sparkles:",
                    initial_sidebar_state="collapsed",
                    menu_items={'About': "#### tayLyrics: A lyrics guessing game for Swifties"})
@@ -586,10 +587,10 @@ def answered_incorrectly():
                                                      \n\n**GAME OVER**: You ran out of lives! Please start a new game.
                                                      \n\nThe correct answer was **{st.session_state.correct_song}**, {st.session_state.correct_section}, from the album **{st.session_state.correct_album}**.'''
             st.session_state.incorrect_feedback = ""
-            st.session_state.guess = ""
+            st.session_state.guess = None
             end_game()
             st.rerun()
-    st.session_state.guess = ""
+    st.session_state.guess = None
 
 def hint():
     st.session_state.hints += 1
@@ -694,8 +695,6 @@ def highlight_new_row(row):
         return [''] * len(row)
 
 ### UI ###
-st.title("Welcome to :sparkles:tayLyrics:sparkles:!")
-
 with st.sidebar:
     with st.expander(":frame_with_picture: Themes", expanded=True):
         st.radio("Select a theme", 
@@ -708,159 +707,163 @@ with st.sidebar:
     st.markdown(f"Made with :heart: by Jasmine Xu")
     st.markdown(f"Contact me at <jasminexu@utexas.edu>")
 
-if st.session_state.game_in_progress == False: 
 
-    start_tab, past_stats_tab, leaderboard_tab = st.tabs(["Start New Game", "Past Game Statistics", "Leaderboard"])
+buffer1, main_col, buffer2 = st.columns([1, 3, 1])
+with main_col:
+    st.title("Welcome to :sparkles:tayLyrics:sparkles:!")
+    if st.session_state.game_in_progress == False: 
 
-    with start_tab: 
+        start_tab, past_stats_tab, leaderboard_tab = st.tabs(["Start New Game", "Past Game Statistics", "Leaderboard"])
 
-        with st.expander(":pencil2: Instructions (click to expand)", expanded=False): 
-            st.markdown(f"Lyrics range from debut to *{ALL_ALBUMS[-1]}*. All Taylor's Version vault tracks are included!")
-            st.markdown(f"Capitalization and minor spelling errors do NOT matter!")
-            st.markdown("### IMPORTANT GUIDELINES:")
-            st.markdown('* Do NOT include "(Taylor\'s Version)" in your guesses; e.g. "Back to December (Taylor\'s Version)" should simply be "Back to December."\n* Answer "All Too Well" for BOTH the 5-minute and 10-minute versions of All Too Well.')
-        
-        start_form = st.form("game_settings")
-        with start_form:
-            st.markdown("### Start a New Game")
-            st.selectbox("Select a game difficulty", 
-                         options=DIFFICULTIES,
-                         index=DIFFICULTIES.index(st.session_state.difficulty) if st.session_state.difficulty else 0,
-                         key="difficulty0")
-            st.selectbox("Select a game mode",
-                         options=GAME_MODES,
-                         index=GAME_MODES.index(st.session_state.game_mode) if st.session_state.game_mode else 0,
-                         key="game_mode0")
-            with st.expander("Advanced options"):
-                st.multiselect("Select albums to generate lyrics from",
-                               options=ALL_ALBUMS_SHORT,
-                               default=st.session_state.albums if st.session_state.albums else ALL_ALBUMS_SHORT,
-                               key="albums0")
-            started = st.form_submit_button(":large_green_square: Start new game")
+        with start_tab: 
 
-        if started: 
-            st.session_state.difficulty = st.session_state.difficulty0
-            st.session_state.game_mode = st.session_state.game_mode0
-            st.session_state.albums = st.session_state.albums0
-
-            if len(st.session_state.albums) == 0: 
-                start_form.error("Please select at least one album.")
-            else:
-                st.session_state.start_btn_clicked = True
+            with st.expander(":pencil2: Instructions (click to expand)", expanded=False): 
+                st.markdown(f"Lyrics range from debut to *{ALL_ALBUMS[-1]}*. All Taylor's Version vault tracks are included!")
+                st.markdown(f"Capitalization and minor spelling errors do NOT matter!")
+                st.markdown("### IMPORTANT GUIDELINES:")
+                st.markdown('* Do NOT include "(Taylor\'s Version)" in your guesses; e.g. "Back to December (Taylor\'s Version)" should simply be "Back to December."\n* Answer "All Too Well" for BOTH the 5-minute and 10-minute versions of All Too Well.')
             
-        if st.session_state.gameover_feedback: 
-            st.error(st.session_state.gameover_feedback, icon="😢")
-            
-        if st.session_state.hint_feedback:
-            st.info(f"{st.session_state.hint_feedback}", icon="ℹ️")
+            start_form = st.form("game_settings")
+            with start_form:
+                st.markdown("### Start a New Game")
+                st.selectbox("Select a game difficulty", 
+                            options=DIFFICULTIES,
+                            index=DIFFICULTIES.index(st.session_state.difficulty) if st.session_state.difficulty else 0,
+                            key="difficulty0")
+                st.selectbox("Select a game mode",
+                            options=GAME_MODES,
+                            index=GAME_MODES.index(st.session_state.game_mode) if st.session_state.game_mode else 0,
+                            key="game_mode0")
+                with st.expander("Advanced options"):
+                    st.multiselect("Select albums to generate lyrics from",
+                                options=ALL_ALBUMS_SHORT,
+                                default=st.session_state.albums if st.session_state.albums else ALL_ALBUMS_SHORT,
+                                key="albums0")
+                started = st.form_submit_button(":large_green_square: Start new game")
 
-        if st.session_state.incorrect_feedback:
-            st.error(f"{st.session_state.incorrect_feedback}", icon="🚨")
-        
-        if st.session_state.giveup_feedback:
-            st.error(f"{st.session_state.giveup_feedback}", icon="🚨")
+            if started: 
+                st.session_state.difficulty = st.session_state.difficulty0
+                st.session_state.game_mode = st.session_state.game_mode0
+                st.session_state.albums = st.session_state.albums0
 
-    with past_stats_tab:
-        if st.session_state.past_game_stats: 
-            st.markdown("### Past Game Statistics")
-            st.markdown(st.session_state.past_game_stats)
-            if st.session_state.album_accs:
-                with st.expander("**Per-album accuracies**"):
-                    s = ""
-                    for album_name, tup in st.session_state.album_accs.items(): 
-                        s += f"* {album_name}: {tup[0]}% ({tup[1]}/{tup[2]})\n"
-                    st.markdown(s)
-        else: 
-            st.markdown("#### You must start a game before viewing past game statistics!")
-
-    with leaderboard_tab: 
-        st.markdown("### Leaderboards")
-        if st.session_state.enable_leaderboard:
-            with st.popover(f"Add your results to the leaderboard"):
-                st.markdown("#### Add your results")
-                possible_pct = round(st.session_state.points * 100 / (st.session_state.round_count * POINTS_MAPPING[st.session_state.difficulty]), 2)
-                possible_str = f"{st.session_state.points}/{st.session_state.round_count * POINTS_MAPPING[st.session_state.difficulty]} ({possible_pct}%)"
-                st.markdown(f"Scores to be added: (Round count {st.session_state.round_count}, Points of possible {possible_str})")
-                st.text_input("Enter your name",
-                              key="leaderboard_name",
-                              disabled=st.session_state.disable_name_input,
-                              on_change=name_submitted)
-            st.markdown(st.session_state.rank_msg)
-        else: 
-            st.markdown(f"Your game results can only be added to the leaderboard if you played 5+ rounds in Survival mode with all albums enabled.")
-
-        with Leaderboards() as leaderboard:
-            current_leaderboards = leaderboard.get_leaderboards()
-        
-        leaderboard_to_show = st.selectbox("Select leaderboard to display",
-                                           options=DIFFICULTIES,
-                                           index=DIFFICULTIES.index(st.session_state.difficulty) if st.session_state.difficulty else 0)
-        shown_leaderboard = current_leaderboards[leaderboard_to_show]
-        shown_leaderboard = shown_leaderboard.style.apply(highlight_new_row, axis=1)
-        st.markdown(f"### {DIFFICULTY_MAPPING[leaderboard_to_show]} Leaderboard")
-        st.dataframe(shown_leaderboard, use_container_width=True)
-
-if st.session_state.start_btn_clicked:
-    game_started()
-    
-    st.session_state.start_btn_clicked = False
-    st.rerun()
-
-if st.session_state.game_in_progress == True: 
-    with st.container(border=True):
-        game_tab, stats_tab = st.tabs(["Game", "Current Game Statistics"])
-        with game_tab:
-            st.write(f"<h4><u>Round {st.session_state.round_count}<u/></h4>", unsafe_allow_html=True)
-            st.write(st.session_state.generated_lyrics, unsafe_allow_html=True)
-            st.text("")
-            st.text_input("Enter your guess",
-                        placeholder="e.g. Back to December or Shake it Off",
-                        key="temp_guess",
-                        on_change=clear_guess,
-                        disabled=st.session_state.disable_buttons)
-            if st.session_state.guess: 
-                if st.session_state.lyrics.get_guess_feedback(st.session_state.guess): 
-                    answered_correctly()
-                else: 
-                    answered_incorrectly()
-            
-            col1, col2, col3, col4 = st.columns([1.5, 3, 1, 1])
-            hint_btn = col1.button(":bulb: Hint", on_click=hint, disabled=st.session_state.disable_hint_btn, 
-                                   help="You get 3 hints per round; Hint 1 gives the album, and Hint 2 and 3 give the next and previous lines, respectively. Each hint deducts 1 point from your total.")
-            giveup_btn = col2.button(":no_entry: Give up", on_click=giveup, 
-                                     disabled=st.session_state.disable_buttons,
-                                     help="2 points are deducted from your total if you give up.")
-            
+                if len(st.session_state.albums) == 0: 
+                    start_form.error("Please select at least one album.")
+                else:
+                    st.session_state.start_btn_clicked = True
+                
+            if st.session_state.gameover_feedback: 
+                st.error(st.session_state.gameover_feedback, icon="😢")
+                
             if st.session_state.hint_feedback:
                 st.info(f"{st.session_state.hint_feedback}", icon="ℹ️")
 
             if st.session_state.incorrect_feedback:
                 st.error(f"{st.session_state.incorrect_feedback}", icon="🚨")
-
-            if st.session_state.correct_feedback:
-                st.success(f"{st.session_state.correct_feedback}", icon="✅")
-                st.button(":arrow_right: Next round", on_click=new_round)
             
-            if (st.session_state.giveup_feedback) and not (st.session_state.gameover_feedback):
+            if st.session_state.giveup_feedback:
                 st.error(f"{st.session_state.giveup_feedback}", icon="🚨")
-                st.button(":arrow_right: Next round", on_click=new_round)
-            
-            col1, col2, col4 = st.columns(3)
-            col4.button(":octagonal_sign: End current game", on_click=end_game, key="end_game")
 
-        with stats_tab:
-            st.markdown(f"### In-Game Statistics")
-            st.markdown(f"**{DIFFICULTY_MAPPING[st.session_state.difficulty]} difficulty, {MODE_MAPPING[st.session_state.game_mode]} mode**")
-            st.markdown(f"* :large_green_circle: Round: {st.session_state.round_count}")
+        with past_stats_tab:
+            if st.session_state.past_game_stats: 
+                st.markdown("### Past Game Statistics")
+                st.markdown(st.session_state.past_game_stats)
+                if st.session_state.album_accs:
+                    with st.expander("**Per-album accuracies**"):
+                        s = ""
+                        for album_name, tup in st.session_state.album_accs.items(): 
+                            s += f"* {album_name}: {tup[0]}% ({tup[1]}/{tup[2]})\n"
+                        st.markdown(s)
+            else: 
+                st.markdown("#### You must start a game before viewing past game statistics!")
 
-            accuracy_pct = round((sum(st.session_state.round_results) * 100 /st.session_state.round_count), 2)
-            possible_pct = round(st.session_state.points * 100 / (st.session_state.round_count * POINTS_MAPPING[st.session_state.difficulty]), 2)
-            accuracy_str = f"{sum(st.session_state.round_results)}/{st.session_state.round_count} ({accuracy_pct}%)"
-            possible_str = f"{st.session_state.points}/{st.session_state.round_count * POINTS_MAPPING[st.session_state.difficulty]} ({possible_pct}%)"
+        with leaderboard_tab: 
+            st.markdown("### Leaderboards")
+            if st.session_state.enable_leaderboard:
+                with st.popover(f"Add your results to the leaderboard"):
+                    st.markdown("#### Add your results")
+                    possible_pct = round(st.session_state.points * 100 / (st.session_state.round_count * POINTS_MAPPING[st.session_state.difficulty]), 2)
+                    possible_str = f"{st.session_state.points}/{st.session_state.round_count * POINTS_MAPPING[st.session_state.difficulty]} ({possible_pct}%)"
+                    st.markdown(f"Scores to be added: (Round count {st.session_state.round_count}, Points of possible {possible_str})")
+                    st.text_input("Enter your name",
+                                key="leaderboard_name",
+                                disabled=st.session_state.disable_name_input,
+                                on_change=name_submitted)
+                st.markdown(st.session_state.rank_msg)
+            else: 
+                st.markdown(f"Your game results can only be added to the leaderboard if you played 5+ rounds in Survival mode with all albums enabled.")
+
+            with Leaderboards() as leaderboard:
+                current_leaderboards = leaderboard.get_leaderboards()
             
-            st.markdown(f"* :dart: Accuracy: {accuracy_str}")
-            st.markdown(f"* :100: Points out of total possible: {possible_str}")
-            st.markdown(f"* :fire: Current streak: {st.session_state.streak}")
-            st.markdown(f"* :moneybag: Total points: {st.session_state.points}")
-            if st.session_state.game_mode == "Survival (with 3 lives)":
-                st.markdown(f"* :space_invader: Lives: {st.session_state.lives}")
+            leaderboard_to_show = st.selectbox("Select leaderboard to display",
+                                            options=DIFFICULTIES,
+                                            index=DIFFICULTIES.index(st.session_state.difficulty) if st.session_state.difficulty else 0)
+            shown_leaderboard = current_leaderboards[leaderboard_to_show]
+            shown_leaderboard = shown_leaderboard.style.apply(highlight_new_row, axis=1)
+            st.markdown(f"### {DIFFICULTY_MAPPING[leaderboard_to_show]} Leaderboard")
+            st.dataframe(shown_leaderboard, use_container_width=True)
+
+    if st.session_state.start_btn_clicked:
+        game_started()
+        
+        st.session_state.start_btn_clicked = False
+        st.rerun()
+
+    if st.session_state.game_in_progress == True: 
+        with st.container(border=True):
+            game_tab, stats_tab = st.tabs(["Game", "Current Game Statistics"])
+            with game_tab:
+                st.write(f"<h4><u>Round {st.session_state.round_count}<u/></h4>", unsafe_allow_html=True)
+                st.write(st.session_state.generated_lyrics, unsafe_allow_html=True)
+                st.text("")
+                st.text_input("Enter your guess",
+                            placeholder="e.g. Back to December or Shake it Off",
+                            key="temp_guess",
+                            on_change=clear_guess,
+                            disabled=st.session_state.disable_buttons)
+                if st.session_state.guess: 
+                    if st.session_state.lyrics.get_guess_feedback(st.session_state.guess): 
+                        answered_correctly()
+                    else: 
+                        answered_incorrectly()
+                
+                col1, col2, col3, col4 = st.columns([1.5, 3, 1, 1])
+                hint_btn = col1.button(":bulb: Hint", on_click=hint, disabled=st.session_state.disable_hint_btn, 
+                                    help="You get 3 hints per round; Hint 1 gives the album, and Hint 2 and 3 give the next and previous lines, respectively. Each hint deducts 1 point from your total.")
+                giveup_btn = col2.button(":no_entry: Give up", on_click=giveup, 
+                                        disabled=st.session_state.disable_buttons,
+                                        help="2 points are deducted from your total if you give up.")
+                
+                if st.session_state.hint_feedback:
+                    st.info(f"{st.session_state.hint_feedback}", icon="ℹ️")
+
+                if st.session_state.incorrect_feedback:
+                    st.error(f"{st.session_state.incorrect_feedback}", icon="🚨")
+
+                if st.session_state.correct_feedback:
+                    st.success(f"{st.session_state.correct_feedback}", icon="✅")
+                    st.button(":arrow_right: Next round", on_click=new_round)
+                
+                if (st.session_state.giveup_feedback) and not (st.session_state.gameover_feedback):
+                    st.error(f"{st.session_state.giveup_feedback}", icon="🚨")
+                    st.button(":arrow_right: Next round", on_click=new_round)
+                
+                col1, col2, col4 = st.columns(3)
+                col4.button(":octagonal_sign: End current game", on_click=end_game, key="end_game")
+
+            with stats_tab:
+                st.markdown(f"### In-Game Statistics")
+                st.markdown(f"**{DIFFICULTY_MAPPING[st.session_state.difficulty]} difficulty, {MODE_MAPPING[st.session_state.game_mode]} mode**")
+                st.markdown(f"* :large_green_circle: Round: {st.session_state.round_count}")
+
+                accuracy_pct = round((sum(st.session_state.round_results) * 100 /st.session_state.round_count), 2)
+                possible_pct = round(st.session_state.points * 100 / (st.session_state.round_count * POINTS_MAPPING[st.session_state.difficulty]), 2)
+                accuracy_str = f"{sum(st.session_state.round_results)}/{st.session_state.round_count} ({accuracy_pct}%)"
+                possible_str = f"{st.session_state.points}/{st.session_state.round_count * POINTS_MAPPING[st.session_state.difficulty]} ({possible_pct}%)"
+                
+                st.markdown(f"* :dart: Accuracy: {accuracy_str}")
+                st.markdown(f"* :100: Points out of total possible: {possible_str}")
+                st.markdown(f"* :fire: Current streak: {st.session_state.streak}")
+                st.markdown(f"* :moneybag: Total points: {st.session_state.points}")
+                if st.session_state.game_mode == "Survival (with 3 lives)":
+                    st.markdown(f"* :space_invader: Lives: {st.session_state.lives}")
