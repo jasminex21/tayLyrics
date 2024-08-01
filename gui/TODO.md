@@ -1,6 +1,7 @@
 ### TODO
 
 #### Server
+* [PRIORITY] Add a button/option somewhere (less obvious) to download the leaderboard DATABASE - I don't quite know how else I can access the DB that the deployed app is using, and if I update the app, it'll erase the leaderboard unless I have it locally and push it to the repo also. 
 * Add seed-setting in advanced options so that generated lyrics are the same. Maybe there isn't a huge application but it would be fun if two people (e.g. me and Hannah) wanted to compete against each other
 * One consideration - currently the Leaderboards rank players by the number of rounds they play first, and then by the % of points they got out of the points possible. Both of these should maybe be closer to equally-weighted in the ranking consideration. Maybe combine them in some way. Keep as is for now for simplcity tho.
 

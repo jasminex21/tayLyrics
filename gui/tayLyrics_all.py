@@ -269,7 +269,7 @@ ALL_ALBUMS = ["Taylor Swift",
 DIFFICULTIES = ["Easy (an entire section, e.g. chorus)", 
                 "Medium (2 lines)", 
                 "Hard (1 line)"]
-GAME_MODES = ["Survival (with 3 lives)",
+GAME_MODES = ["Survival (with 5 lives)",
               "Casual (no lives)"]
 POINTS_MAPPING = {"Easy (an entire section, e.g. chorus)": 1, 
                   "Medium (2 lines)": 3, 
@@ -288,7 +288,7 @@ ALL_ALBUMS_SHORT = ["Debut",
                     "evermore",
                     "Midnights",
                     "TTPD"]
-MODE_MAPPING = {"Survival (with 3 lives)": "Survival",
+MODE_MAPPING = {"Survival (with 5 lives)": "Survival",
                 "Casual (no lives)": "Casual"}
 ALBUMS_MAPPING = {long:short for long, short in zip(ALL_ALBUMS, ALL_ALBUMS_SHORT)}
 ALBUMS_MAPPING_INVERSE = {short:long for long, short in ALBUMS_MAPPING.items()}
@@ -400,7 +400,7 @@ if "game_mode" not in st.session_state:
 if "albums" not in st.session_state:
     st.session_state.albums = []
 if "lives" not in st.session_state:
-    st.session_state.lives = 3
+    st.session_state.lives = 5
 if "hints" not in st.session_state:
     st.session_state.hints = 0
 if "hints_used" not in st.session_state:
@@ -476,6 +476,11 @@ def apply_theme(selected_theme):
         background: {selected_theme['button_color']} !important;
         color: {selected_theme["text_color"]};
     }}
+    th {{
+        color: {selected_theme["text_color"]} !important;
+        font-weight: 900 !important;
+        text-align: left !important;
+    }}
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
@@ -531,7 +536,7 @@ def game_started():
     st.session_state.streaks = []
     st.session_state.hints = 0
     st.session_state.hints_used = 0
-    st.session_state.lives = 3
+    st.session_state.lives = 5
     st.session_state.guess = None
     st.session_state.hide_buttons = False
 
@@ -584,7 +589,7 @@ def answered_incorrectly():
     st.session_state.streaks.append(st.session_state.streak)
     st.session_state.streak = 0
 
-    if st.session_state.game_mode == "Survival (with 3 lives)":
+    if st.session_state.game_mode == "Survival (with 5 lives)":
         st.session_state.incorrect_feedback += f"\n\nYou lost a life and have **{st.session_state.lives} lives** left."
         if st.session_state.lives == 0:
             st.session_state.disable_buttons = True
@@ -626,10 +631,10 @@ def giveup():
 
     st.session_state.giveup_feedback = f"""The correct answer was **{st.session_state.correct_song}**, {st.session_state.correct_section}, from the album **{st.session_state.correct_album}**\n\nYou lost 2 points and have **{st.session_state.points} total points**."""        
 
-    if st.session_state.game_mode == "Survival (with 3 lives)":
+    if st.session_state.game_mode == "Survival (with 5 lives)":
         st.session_state.giveup_feedback += f"\n\nYou lost a life and have **{st.session_state.lives} lives** left."
         if st.session_state.lives == 0: 
-            st.session_state.gameover_feedback = f'''"**GAME OVER**: You ran out of lives! Please start a new game.
+            st.session_state.gameover_feedback = f'''**GAME OVER**: You ran out of lives! Please start a new game.
                                                       \n\nThe correct answer was **{st.session_state.correct_song}**, {st.session_state.correct_section}, from the album **{st.session_state.correct_album}**.'''
             st.session_state.giveup_feedback = ""
             end_game()
@@ -647,12 +652,12 @@ def end_game():
     accuracy_str = f"{sum(st.session_state.round_results)}/{st.session_state.round_count} ({accuracy_pct}%)"
     possible_str = f"{st.session_state.points}/{st.session_state.round_count * POINTS_MAPPING[st.session_state.difficulty]} ({possible_pct}%)"
 
-    accs = {album: (round(sum(ls) * 100/len(ls), 3), sum(ls), len(ls)) 
-            if len(ls) else (0, 0, 0) for album, ls in st.session_state.album_counter.items()}
+    accs = {album: (round(sum(ls) * 100/len(ls), 2), sum(ls), len(ls)) 
+            if len(ls) else (0.0, 0, 0) for album, ls in st.session_state.album_counter.items()}
     st.session_state.album_accs = dict(sorted(accs.items(), 
                                        key=lambda x: (x[1][0], x[1][2], x[1][1]),
                                        reverse=True))
-    st.session_state.enable_leaderboard = True if ((st.session_state.game_mode == "Survival (with 3 lives)") and
+    st.session_state.enable_leaderboard = True if ((st.session_state.game_mode == "Survival (with 5 lives)") and
                                                    (len(st.session_state.albums) == len(ALL_ALBUMS)) and
                                                    (st.session_state.round_count >= 5)) else False
     
@@ -840,8 +845,8 @@ with main_col:
                     else: 
                         answered_incorrectly()
                 
-                col1, col2, col3, col4 = st.columns([1.5, 3, 1, 1])
                 if not st.session_state.hide_buttons:
+                    col1, col2, col3, col4 = st.columns([1.5, 3, 1, 1])
                     hint_btn = col1.button(":bulb: Hint", on_click=hint, disabled=st.session_state.disable_hint_btn, 
                                         help="You get 3 hints per round; Hint 1 gives the album, and Hint 2 and 3 give the next and previous lines, respectively. Each hint deducts 1 point from your total.")
                     giveup_btn = col2.button(":no_entry: Give up", on_click=giveup, 
@@ -879,5 +884,5 @@ with main_col:
                 st.markdown(f"* :100: Points out of total possible: {possible_str}")
                 st.markdown(f"* :fire: Current streak: {st.session_state.streak}")
                 st.markdown(f"* :moneybag: Total points: {st.session_state.points}")
-                if st.session_state.game_mode == "Survival (with 3 lives)":
+                if st.session_state.game_mode == "Survival (with 5 lives)":
                     st.markdown(f"* :space_invader: Lives: {st.session_state.lives}")
