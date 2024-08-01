@@ -179,6 +179,8 @@ if "rank_msg" not in st.session_state:
     st.session_state.rank_msg = ""
 if "start_btn_clicked" not in st.session_state:
     st.session_state.start_btn_clicked = False
+if "hide_buttons" not in st.session_state:
+    st.session_state.hide_buttons = False
 
 ### FUNCTIONS ###
 def apply_theme(selected_theme):
@@ -275,19 +277,24 @@ def game_started():
     st.session_state.round_count = 1
     st.session_state.round_results = []
     st.session_state.disable_buttons = False
+    st.session_state.disable_hint_btn = False
     st.session_state.points = 0
     st.session_state.streak = 0
     st.session_state.streaks = []
     st.session_state.hints = 0
     st.session_state.hints_used = 0
     st.session_state.lives = 3
+    st.session_state.guess = None
+    st.session_state.hide_buttons = False
 
 def new_round():
     st.session_state.round_count += 1
     st.session_state.disable_buttons = False
     st.session_state.disable_hint_btn = False
     st.session_state.hints = 0
-    
+    st.session_state.guess = None
+    st.session_state.hide_buttons = False
+
     clear_feedback()
 
     (st.session_state.generated_lyrics, 
@@ -320,6 +327,7 @@ def answered_correctly():
     st.session_state.streak += 1
     correct_album_short = ALBUMS_MAPPING[st.session_state.correct_album]
     st.session_state.album_counter[correct_album_short].append(True)
+    st.session_state.hide_buttons = True
 
 def answered_incorrectly():
     st.session_state.points -= 1
@@ -339,7 +347,6 @@ def answered_incorrectly():
                                                      \n\n**GAME OVER**: You ran out of lives! Please start a new game.
                                                      \n\nThe correct answer was **{st.session_state.correct_song}**, {st.session_state.correct_section}, from the album **{st.session_state.correct_album}**.'''
             st.session_state.incorrect_feedback = ""
-            st.session_state.guess = None
             end_game()
             st.rerun()
     st.session_state.guess = None
@@ -365,6 +372,7 @@ def giveup():
     st.session_state.round_results.append(False)
     st.session_state.streaks.append(st.session_state.streak)
     st.session_state.streak = 0
+    st.session_state.hide_buttons = True
     correct_album_short = ALBUMS_MAPPING[st.session_state.correct_album]
     st.session_state.album_counter[correct_album_short].append(False)
 
@@ -373,7 +381,9 @@ def giveup():
     if st.session_state.game_mode == "Survival (with 3 lives)":
         st.session_state.giveup_feedback += f"\n\nYou lost a life and have **{st.session_state.lives} lives** left."
         if st.session_state.lives == 0: 
-            st.session_state.gameover_feedback = f'**GAME OVER**: You ran out of lives! Please start a new game.'
+            st.session_state.gameover_feedback = f'''"**GAME OVER**: You ran out of lives! Please start a new game.
+                                                      \n\nThe correct answer was **{st.session_state.correct_song}**, {st.session_state.correct_section}, from the album **{st.session_state.correct_album}**.'''
+            st.session_state.giveup_feedback = ""
             end_game()
             return
 
@@ -432,7 +442,7 @@ def name_submitted():
         current_leaderboards = leaderboard.get_leaderboards()
 
     added_to_df = current_leaderboards[st.session_state.difficulty]
-    filtered_row = added_to_df[added_to_df["Datetime"].astype(str) == str(st.session_state.submitted_datetime)]
+    filtered_row = added_to_df[added_to_df["Datetime (UTC)"].astype(str) == str(st.session_state.submitted_datetime)]
     added_rank = int(filtered_row.index[0])
     out_of = added_to_df.shape[0]
 
@@ -441,7 +451,7 @@ def name_submitted():
 
 def highlight_new_row(row):
     """Highlights the row that was just added to the leaderboard in green"""
-    if str(row["Datetime"]) == str(st.session_state.submitted_datetime):
+    if str(row["Datetime (UTC)"]) == str(st.session_state.submitted_datetime):
         return ['background-color: #0D460D'] * len(row)
     else:
         return [''] * len(row)
@@ -515,12 +525,15 @@ with main_col:
             if st.session_state.giveup_feedback:
                 st.error(f"{st.session_state.giveup_feedback}", icon="🚨")
 
+            if st.session_state.enable_leaderboard:
+                st.info("You can add your scores to the leaderboard!", icon="ℹ️")
+
         with past_stats_tab:
             if st.session_state.past_game_stats: 
                 st.markdown("### Past Game Statistics")
                 st.markdown(st.session_state.past_game_stats)
                 if st.session_state.album_accs:
-                    with st.expander("**Per-album accuracies**"):
+                    with st.expander("**Per-album accuracies (click to expand)**"):
                         s = ""
                         for album_name, tup in st.session_state.album_accs.items(): 
                             s += f"* {album_name}: {tup[0]}% ({tup[1]}/{tup[2]})\n"
@@ -580,11 +593,12 @@ with main_col:
                         answered_incorrectly()
                 
                 col1, col2, col3, col4 = st.columns([1.5, 3, 1, 1])
-                hint_btn = col1.button(":bulb: Hint", on_click=hint, disabled=st.session_state.disable_hint_btn, 
-                                    help="You get 3 hints per round; Hint 1 gives the album, and Hint 2 and 3 give the next and previous lines, respectively. Each hint deducts 1 point from your total.")
-                giveup_btn = col2.button(":no_entry: Give up", on_click=giveup, 
-                                        disabled=st.session_state.disable_buttons,
-                                        help="2 points are deducted from your total if you give up.")
+                if not st.session_state.hide_buttons:
+                    hint_btn = col1.button(":bulb: Hint", on_click=hint, disabled=st.session_state.disable_hint_btn, 
+                                        help="You get 3 hints per round; Hint 1 gives the album, and Hint 2 and 3 give the next and previous lines, respectively. Each hint deducts 1 point from your total.")
+                    giveup_btn = col2.button(":no_entry: Give up", on_click=giveup, 
+                                            disabled=st.session_state.disable_buttons,
+                                            help="2 points are deducted from your total if you give up.")
                 
                 if st.session_state.hint_feedback:
                     st.info(f"{st.session_state.hint_feedback}", icon="ℹ️")
