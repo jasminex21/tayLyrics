@@ -7,7 +7,7 @@ As of July 2024, tayLyrics is updated to contain lyrics up to and including *THE
 
 [Here](https://taylyrics.streamlit.app/) is the link to the game. Good luck and have fun!
 
-![image](https://github.com/user-attachments/assets/37f5ad5a-1f37-488e-9da4-b7ca06281fc4)
+![alt text](image-2.png)
 
 ### ⚔️ The Game
 tayLyrics has 3 difficulty levels: Easy generates a whole section of lyrics (e.g. the entire chorus), Medium generates 2 lines, and Hard generates 1 line. You earn points for each lyric you guess correctly; the higher the difficulty, the more points you get.

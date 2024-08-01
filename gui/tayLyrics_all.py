@@ -254,7 +254,7 @@ class Lyrics():
         return False
 
 ### GLOBAL VARS ###
-ALL_LYRICS = pd.read_csv("/home/jasmine/tayLyrics_v2/tayLyrics/TAYLOR_LYRICS_JUN2024.csv")
+ALL_LYRICS = pd.read_csv("TAYLOR_LYRICS_JUN2024.csv")
 ALL_ALBUMS = ["Taylor Swift", 
               "Fearless (Taylor's Version)",
               "Speak Now (Taylor's Version)", 
@@ -350,8 +350,7 @@ THEME_CSS = {
         "text_color": "black"}}
 
 ### PAGE CONFIG
-st.set_page_config(#layout='wide',
-                   page_title="tayLyrics",
+st.set_page_config(page_title="tayLyrics",
                    page_icon=":sparkles:",
                    initial_sidebar_state="collapsed",
                    menu_items={'About': "#### tayLyrics: A lyrics guessing game for Swifties"})
@@ -586,9 +585,11 @@ def answered_incorrectly():
             st.session_state.gameover_feedback = f'''"{st.session_state.guess}" is not correct.
                                                      \n\n**GAME OVER**: You ran out of lives! Please start a new game.
                                                      \n\nThe correct answer was **{st.session_state.correct_song}**, {st.session_state.correct_section}, from the album **{st.session_state.correct_album}**.'''
+            st.session_state.incorrect_feedback = ""
+            st.session_state.guess = ""
             end_game()
             st.rerun()
-    st.session_state.guess = None
+    st.session_state.guess = ""
 
 def hint():
     st.session_state.hints += 1
@@ -598,10 +599,10 @@ def hint():
     if st.session_state.hints == 1: 
         st.session_state.hint_feedback += f"Hint 1: this song comes from the album **{st.session_state.correct_album}**"
     if st.session_state.hints == 2: 
-        st.session_state.hint_feedback += f'\n\nHint 2: the next line of this song is "*{st.session_state.next_line}*"'
+        st.session_state.hint_feedback += f'\n\nHint 2: the next line of this song is *"{st.session_state.next_line}"*'
     if st.session_state.hints == 3: 
         st.session_state.disable_hint_btn = True
-        st.session_state.hint_feedback += f'\n\nHint 3: the previous line of this song is "*{st.session_state.prev_line}*"'
+        st.session_state.hint_feedback += f'\n\nHint 3: the previous line of this song is *"{st.session_state.prev_line}"*'
 
 def giveup():
     st.session_state.disable_buttons = True
