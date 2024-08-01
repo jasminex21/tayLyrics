@@ -94,17 +94,17 @@ class Leaderboards:
         """
 
         all_leaderboards = {}
-        columns = ["ID", "Name", "Rounds", "Points of possible", "Datetime", "Points of Possible pct."]
-        final_cols = ["Rank", "Name", "Rounds", "Points of possible", "Datetime"]
+        columns = ["ID", "Name", "Rounds", "Points of possible", "Datetime (UTC)", "Points of Possible pct."]
+        final_cols = ["Rank", "Name", "Rounds", "Points of possible", "Datetime (UTC)"]
 
         for table_name, long_name in zip(self.table_names, list(self.difficulty_mapping.keys())): 
             self.cursor.execute(f"SELECT * FROM {table_name}")
             rows = self.cursor.fetchall()
 
             df = pd.DataFrame(rows, columns=columns)
-            df["Datetime"] = pd.to_datetime(df["Datetime"])
+            df["Datetime"] = pd.to_datetime(df["Datetime (UTC)"])
             # the primary determinator of rank is the number of rounds
-            df = df.sort_values(by=["Rounds", 'Points of Possible pct.', "Datetime"], ascending=[False, False, True])
+            df = df.sort_values(by=["Rounds", 'Points of Possible pct.', "Datetime (UTC)"], ascending=[False, False, True])
             df["Rank"] = df[["Rounds"]].rank(method="first", ascending=False).astype(int)
             final_df = df[final_cols].set_index("Rank")
             all_leaderboards[long_name] = final_df
