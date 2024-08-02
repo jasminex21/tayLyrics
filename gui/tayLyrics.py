@@ -236,6 +236,7 @@ def apply_theme(selected_theme):
     }}
     td {{
         color: {selected_theme["text_color"]} !important;
+        font-weight: 600 !important;
     }}
     </style>
     """
@@ -463,7 +464,7 @@ def name_submitted():
 def highlight_new_row(row):
     """Highlights the row that was just added to the leaderboard in green"""
     if str(row["Datetime (UTC)"]) == str(st.session_state.submitted_datetime):
-        return ['background-color: #0D460D'] * len(row)
+        return ['background-color: #637C63'] * len(row)
     else:
         return [''] * len(row)
     
