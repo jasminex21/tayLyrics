@@ -569,6 +569,7 @@ def regenerate():
     return generated_lyrics, correct_song, correct_album, next_line, prev_line, section
 
 def answered_correctly():
+    st.session_state.incorrect_feedback = ""
     st.session_state.points += POINTS_MAPPING[st.session_state.difficulty]
     st.session_state.correct_feedback = f"""That is correct! The answer is indeed **{st.session_state.correct_song}**, 
                                             {st.session_state.correct_section}, from the album **{st.session_state.correct_album}**.
@@ -619,6 +620,7 @@ def hint():
         st.session_state.hint_feedback += f'\n\nHint 3: the previous line of this song is *"{st.session_state.prev_line}"*'
 
 def giveup():
+    st.session_state.incorrect_feedback = ""
     st.session_state.disable_buttons = True
     st.session_state.disable_hint_btn = True
     st.session_state.points -= 2
@@ -702,13 +704,14 @@ def name_submitted():
 
     st.session_state.rank_msg = f"Your game results were added to the leaderboard!\nYou ranked in position {added_rank} out of {out_of} total results."
 
+
 def highlight_new_row(row):
     """Highlights the row that was just added to the leaderboard in green"""
     if str(row["Datetime (UTC)"]) == str(st.session_state.submitted_datetime):
         return ['background-color: #0D460D'] * len(row)
     else:
         return [''] * len(row)
-
+    
 def get_database(path="leaderboard.db"):
     with open(path, "rb") as f:
         return f.read()
@@ -783,14 +786,14 @@ with main_col:
             if st.session_state.gameover_feedback: 
                 st.error(st.session_state.gameover_feedback, icon="😢")
                 
-            if st.session_state.hint_feedback:
-                st.info(f"{st.session_state.hint_feedback}", icon="ℹ️")
+            # if st.session_state.hint_feedback:
+            #     st.info(f"{st.session_state.hint_feedback}", icon="ℹ️")
 
-            if st.session_state.incorrect_feedback:
-                st.error(f"{st.session_state.incorrect_feedback}", icon="🚨")
+            # if st.session_state.incorrect_feedback:
+            #     st.error(f"{st.session_state.incorrect_feedback}", icon="🚨")
             
-            if st.session_state.giveup_feedback:
-                st.error(f"{st.session_state.giveup_feedback}", icon="🚨")
+            # if st.session_state.giveup_feedback:
+            #     st.error(f"{st.session_state.giveup_feedback}", icon="🚨")
 
             if st.session_state.enable_leaderboard:
                 st.info("You can add your scores to the leaderboard!", icon="ℹ️")
