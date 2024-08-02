@@ -482,6 +482,9 @@ def apply_theme(selected_theme):
         font-weight: 900 !important;
         text-align: left !important;
     }}
+    td {{
+        color: {selected_theme["text_color"]} !important;
+    }}
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
