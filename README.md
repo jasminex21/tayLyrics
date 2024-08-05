@@ -14,7 +14,7 @@ tayLyrics has 3 difficulty levels: Easy generates a whole section of lyrics (e.g
 
 If you don't have a guess, you can ask for a hint - there are three hints available for each generated lyric. These hints yield the lyric's album, next line, and previous line, respectively. Or, you could also choose to give up and move on to the next round. But keep in mind that getting hints and giving up will cost you points!
 
-You can choose to play in Casual (unlimited lives) or Survival (3 lives) mode. In the latter, the stakes are upped - any time you answer incorrectly or give up, you lose a life. Your goal is to make it as many rounds as you can without losing all 3 of your lives, while also making sure not to use too many hints, because those will cost you points. 
+You can choose to play in Casual (unlimited lives) or Survival (5 lives) mode. In the latter, the stakes are upped - any time you answer incorrectly or give up, you lose a life. Your goal is to make it as many rounds as you can without losing all 5 of your lives, while also making sure not to use too many hints, because those will cost you points. 
 
 If you play in Survival mode and have all albums enabled in the Advanced Options, you can choose to record your game scores in the leaderboard and see how you match up with other Swifties!
 
