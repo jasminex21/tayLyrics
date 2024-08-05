@@ -59,10 +59,9 @@ class Leaderboards:
             create_query = f"""CREATE TABLE IF NOT EXISTS {table_name} (
                                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                                 name TEXT NOT NULL,
+                                points INTEGER NOT NULL,
                                 rounds INTEGER NOT NULL,
-                                points_of_possible TEXT NOT NULL,
-                                datetime TEXT NOT NULL,
-                                points_of_possible_pct REAL NOT NULL)"""
+                                datetime TEXT NOT NULL)"""
             self.cursor.execute(create_query)
             self.connection.commit()
     
@@ -74,20 +73,20 @@ class Leaderboards:
             difficulty: A string specifying the game difficulty; this 
                         determines which leaderboard the results are added to.
 
-            results: A tuple (name, rounds, points_of_possible, datetime, 
-                     points_of_possible_pct) containing the user's game results.
+            results: A tuple (name, points, rounds, points, datetime) containing the user's 
+            game results.
         """
         
         db_difficulty = self.difficulty_mapping[difficulty]
-        add_query = f"""INSERT INTO leaderboard_{db_difficulty} (name, rounds, points_of_possible, datetime, points_of_possible_pct)
-                        VALUES (?, ?, ?, ?, ?)"""
+        add_query = f"""INSERT INTO leaderboard_{db_difficulty} (name, points, rounds, datetime)
+                        VALUES (?, ?, ?, ?)"""
         self.cursor.execute(add_query, results)
         self.connection.commit()
 
     def get_leaderboards(self):
         """
         Method that returns the most updated leaderboards, each ranked by the
-        number of rounds the users have played.
+        number of points the users have earned.
 
         Returns: 
             A dictionary containing the leaderboards (as pandas dataframes) 
@@ -95,8 +94,8 @@ class Leaderboards:
         """
 
         all_leaderboards = {}
-        columns = ["ID", "Name", "Rounds", "Points of possible", "Datetime (UTC)", "Points of Possible pct."]
-        final_cols = ["Rank", "Name", "Rounds", "Points of possible", "Datetime (UTC)"]
+        columns = ["ID", "Name", "Points", "Rounds", "Datetime (UTC)"]
+        final_cols = ["Rank", "Name", "Points", "Rounds", "Datetime (UTC)"]
 
         for table_name, long_name in zip(self.table_names, list(self.difficulty_mapping.keys())): 
             self.cursor.execute(f"SELECT * FROM {table_name}")
@@ -104,9 +103,9 @@ class Leaderboards:
 
             df = pd.DataFrame(rows, columns=columns)
             df["Datetime"] = pd.to_datetime(df["Datetime (UTC)"])
-            # the primary determinator of rank is the number of rounds
-            df = df.sort_values(by=["Rounds", 'Points of Possible pct.', "Datetime (UTC)"], ascending=[False, False, True])
-            df["Rank"] = df[["Rounds"]].rank(method="first", ascending=False).astype(int)
+            # the primary determinator of rank is the number of points earned
+            df = df.sort_values(by=["Points", "Datetime (UTC)"], ascending=[False, True])
+            df["Rank"] = df[["Points"]].rank(method="first", ascending=False).astype(int)
             final_df = df[final_cols].set_index("Rank")
             all_leaderboards[long_name] = final_df
         
