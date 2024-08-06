@@ -684,13 +684,10 @@ def name_submitted():
     st.session_state.disable_name_input = True
     st.session_state.submitted_datetime = strftime("%Y-%m-%d %H:%M:%S", gmtime())
 
-    possible_pct = round(st.session_state.points * 100 / (st.session_state.round_count * POINTS_MAPPING[st.session_state.difficulty]), 2)
-    possible_str = f"{st.session_state.points}/{st.session_state.round_count * POINTS_MAPPING[st.session_state.difficulty]} ({possible_pct}%)"
-
-    game_results = (st.session_state.leaderboard_name, st.session_state.round_count,
-                    possible_str,
-                    st.session_state.submitted_datetime,
-                    possible_pct)
+    game_results = (st.session_state.leaderboard_name,
+                    st.session_state.points,
+                    st.session_state.round_count,
+                    st.session_state.submitted_datetime)
     
     # clear the name input text box
     st.session_state.name = st.session_state.leaderboard_name
@@ -711,7 +708,7 @@ def name_submitted():
 def highlight_new_row(row):
     """Highlights the row that was just added to the leaderboard in green"""
     if str(row["Datetime (UTC)"]) == str(st.session_state.submitted_datetime):
-        return ['background-color: #637C63'] * len(row)
+        return ['background-color: #4D6D4D'] * len(row)
     else:
         return [''] * len(row)
     
@@ -788,15 +785,6 @@ with main_col:
                 
             if st.session_state.gameover_feedback: 
                 st.error(st.session_state.gameover_feedback, icon="😢")
-                
-            # if st.session_state.hint_feedback:
-            #     st.info(f"{st.session_state.hint_feedback}", icon="ℹ️")
-
-            # if st.session_state.incorrect_feedback:
-            #     st.error(f"{st.session_state.incorrect_feedback}", icon="🚨")
-            
-            # if st.session_state.giveup_feedback:
-            #     st.error(f"{st.session_state.giveup_feedback}", icon="🚨")
 
             if st.session_state.enable_leaderboard:
                 st.info("You can add your scores to the leaderboard!", icon="ℹ️")
@@ -819,9 +807,7 @@ with main_col:
             if st.session_state.enable_leaderboard:
                 with st.popover(f"Add your results to the leaderboard"):
                     st.markdown("#### Add your results")
-                    possible_pct = round(st.session_state.points * 100 / (st.session_state.round_count * POINTS_MAPPING[st.session_state.difficulty]), 2)
-                    possible_str = f"{st.session_state.points}/{st.session_state.round_count * POINTS_MAPPING[st.session_state.difficulty]} ({possible_pct}%)"
-                    st.markdown(f"Scores to be added: (Round count {st.session_state.round_count}, Points of possible {possible_str})")
+                    st.markdown(f"Points: {st.session_state.points}")
                     st.text_input("Enter your name",
                                 key="leaderboard_name",
                                 disabled=st.session_state.disable_name_input,
