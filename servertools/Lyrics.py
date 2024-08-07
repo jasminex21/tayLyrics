@@ -38,6 +38,7 @@ class Lyrics():
         """
 
         self.rand_num = random.randint(0, self.data.shape[0] - 1)
+        track_name = self.data["track_name"][self.rand_num]
 
         if mode == "Hard (1 line)": 
             self.start_line = self.rand_num
@@ -45,9 +46,9 @@ class Lyrics():
             return self.data["lyric"][self.rand_num]
         
         if mode == "Medium (2 lines)": 
-            track_name = self.data["track_name"][self.rand_num]
             # check if next line is from same song; it not, give previous line
-            if (self.rand_num <= self.data.shape[0] - 1) and (self.data["track_name"][self.rand_num + 1] == track_name): 
+            if ((self.rand_num <= self.data.shape[0] - 1) 
+                and (self.data["track_name"][self.rand_num + 1] == track_name)): 
                 self.start_line = self.rand_num
                 self.end_line = self.rand_num + 1
             else: 
@@ -60,11 +61,15 @@ class Lyrics():
             rand_section = self.data["element"][self.rand_num]
             # continue adding lines until section differs
             self.start_line = self.rand_num
-            while (self.start_line > 0) and (self.data["element"][self.start_line - 1] == rand_section): 
+            while ((self.start_line > 0) 
+                   and (self.data["element"][self.start_line - 1] == rand_section) 
+                   and (self.data["track_name"][self.start_line - 1] == track_name)): 
                 self.start_line -= 1
 
             self.end_line = self.rand_num
-            while (self.end_line < self.data.shape[0] - 1) and (self.data["element"][self.end_line + 1] == rand_section): 
+            while ((self.end_line < self.data.shape[0] - 1) 
+                   and (self.data["element"][self.end_line + 1] == rand_section)
+                   and (self.data["track_name"][self.end_line + 1] == track_name)): 
                 self.end_line += 1
 
             return "<br>".join(self.data["lyric"][self.start_line:self.end_line + 1].tolist())
