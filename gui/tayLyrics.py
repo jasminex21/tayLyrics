@@ -19,6 +19,8 @@ ALL_ALBUMS = ["Taylor Swift",
               "evermore", 
               "Midnights", 
               "THE TORTURED POETS DEPARTMENT"]
+KEEP_PARENTHESES =  ["Mary's Song (Oh My My My)", 
+                     "I Can Fix Him (No Really I Can)"]
 DIFFICULTIES = ["Easy (an entire section, e.g. chorus)", 
                 "Medium (2 lines)", 
                 "Hard (1 line)"]
@@ -599,7 +601,8 @@ with main_col:
                             on_change=clear_guess,
                             disabled=st.session_state.disable_buttons)
                 if st.session_state.guess: 
-                    if st.session_state.lyrics.get_guess_feedback(st.session_state.guess): 
+                    if st.session_state.lyrics.get_guess_feedback(st.session_state.guess,
+                                                                  KEEP_PARENTHESES): 
                         answered_correctly()
                     else: 
                         answered_incorrectly()

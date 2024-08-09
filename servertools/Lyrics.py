@@ -1,37 +1,34 @@
-import pandas as pd
 import random
 import math
 import re
 import stringdist
+import pandas as pd
+from typing import Optional, List
+
 class Lyrics(): 
     """
     Class to manage lyric generation.
 
     Args:
-        data: A pandas dataframe containing artist lyrics
+        data: 
+            A pandas dataframe containing artist lyrics
     """
-    def __init__(self, data):
+    def __init__(self, data: pd.DataFrame):
         """Constructor"""
 
         self.data = data
         self.rand_num = None
         self.start_line = None
         self.end_line = None
-    
-    def set_random_seed(seed):
 
-        try: 
-            random.seed(int(seed))
-        except ValueError: 
-            return "Seed must be a valid integer, such as 21 or 2003."
-
-    def generate(self, mode):
+    def generate(self, mode: str) -> str:
         """
         Method that returns the generated lyrics, given a game difficulty.
 
         Args:
-            mode: A string specifying the game difficulty (i.e., whether to 
-                  generate a whole section, 2 lines, or 1 line)
+            mode: 
+                A string specifying the game difficulty (i.e., whether to 
+                generate a whole section, 2 lines, or 1 line)
         
         Returns: 
             An HTML-formatted string containing the generated lyrics.
@@ -74,7 +71,7 @@ class Lyrics():
 
             return "<br>".join(self.data["lyric"][self.start_line:self.end_line + 1].tolist())
     
-    def get_track_name(self): 
+    def get_track_name(self) -> str: 
         """
         Method that returns the name of the track whose lyrics were returned.
 
@@ -83,7 +80,7 @@ class Lyrics():
         """
         return self.data["track_name"][self.rand_num]
     
-    def get_album_name(self): 
+    def get_album_name(self) -> str: 
         """
         Method that returns the album of the track whose lyrics were returned.
 
@@ -92,7 +89,7 @@ class Lyrics():
         """
         return self.data["album_name"][self.rand_num]
     
-    def get_previous_line(self):
+    def get_previous_line(self) -> str:
         """
         Method that returns the line prior to the generated lyrics.
 
@@ -105,7 +102,7 @@ class Lyrics():
             return self.data["lyric"][self.start_line - 1]
         return "N/A"
 
-    def get_next_line(self):
+    def get_next_line(self) -> str:
         """
         Method that returns the line following the generated lyrics.
 
@@ -118,7 +115,7 @@ class Lyrics():
             return self.data["lyric"][self.end_line + 1]
         return "N/A"
     
-    def get_section(self):
+    def get_section(self) -> str:
         """
         Returns the section of the generated lyrics.
 
@@ -127,21 +124,39 @@ class Lyrics():
         """
         return self.data["element"][self.rand_num]
     
-    def get_guess_feedback(self, guess): 
+    def get_guess_feedback(self, guess: str, 
+                           remove_parentheses: Optional[bool]=False, 
+                           keep_parentheses: Optional[List]=None) -> bool: 
         """
         Returns a boolean indicating whether a user guess was correct or
         incorrect. Capitalization is waived, as are minor (within 1/3 of the
         track name's length) spelling mistakes.
+
+        Args: 
+            guess: 
+                The user's guess as a string
+
+            remove_parentheses: 
+                Optional parameter used to specify whether to remove parentheses
+                within song titles. Useful if the artist's discography has 
+                features, or if the artist is Taylor Swift
+            
+            keep_parentheses: 
+                When remove_parentheses is True, this is an optional parameter 
+                used to specify songs where the parentheses should not be removed. 
+                Useful if you want to remove incidences of (feat. x) but not
+                parentheses such as (Lobotomy) in Peach (Lobotomy) by Waterparks.
+                Ignored when remove_parentheses is False.
 
         Returns:
             A boolean; True if the guess is "correct," False otherwise.
         """
         correct_song = self.get_track_name()
         # exceptions where the parentheses should be included in the guess
-        if correct_song not in ["Mary's Song (Oh My My My)", 
-                                "I Can Fix Him (No Really I Can)"]:
-            # remove parentheses (e.g. Taylor's Version) from track name
-            correct_song = re.sub(r"\([^)]*\)", "", correct_song).strip()
+        if remove_parentheses:
+            if correct_song not in keep_parentheses:
+                # remove parentheses (e.g. Taylor's Version) from track name
+                correct_song = re.sub(r"\([^)]*\)", "", correct_song).strip()
         guess = guess.strip()
         # allowing for minor typos
         track_name_length = len(correct_song)
