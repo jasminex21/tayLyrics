@@ -868,7 +868,8 @@ with main_col:
                             disabled=st.session_state.disable_buttons)
                 if st.session_state.guess: 
                     if st.session_state.lyrics.get_guess_feedback(st.session_state.guess,
-                                                                  KEEP_PARENTHESES): 
+                                                                  remove_parentheses=True,
+                                                                  keep_parentheses=KEEP_PARENTHESES): 
                         answered_correctly()
                     else: 
                         answered_incorrectly()
