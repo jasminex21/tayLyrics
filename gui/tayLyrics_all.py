@@ -466,6 +466,9 @@ def apply_theme(selected_theme):
     button[data-baseweb="tab"] {{
         background-color: transparent !important;
     }}
+    [data-baseweb="popover"], div[data-baseweb="popover"] > div {{
+        background-color: {"grey" if selected_theme["text_color"] == "black" else "#262730"};
+    }}
     [data-testid="stSidebar"] {{
         background: {selected_theme['background_color']};
     }}
@@ -876,11 +879,9 @@ with main_col:
                 
                 if not st.session_state.hide_buttons:
                     col1, col2, col3, col4 = st.columns([1.5, 3, 1, 1])
-                    hint_btn = col1.button(":bulb: Hint", on_click=hint, disabled=st.session_state.disable_hint_btn, 
-                                        help="You get 3 hints per round; Hint 1 gives the album, and Hint 2 and 3 give the next and previous lines, respectively. Each hint deducts 1 point from your total.")
+                    hint_btn = col1.button(":bulb: Hint", on_click=hint, disabled=st.session_state.disable_hint_btn)
                     giveup_btn = col2.button(":no_entry: Give up", on_click=giveup, 
-                                            disabled=st.session_state.disable_buttons,
-                                            help="2 points are deducted from your total if you give up.")
+                                            disabled=st.session_state.disable_buttons)
                 
                 if st.session_state.hint_feedback:
                     st.info(f"{st.session_state.hint_feedback}", icon="ℹ️")
