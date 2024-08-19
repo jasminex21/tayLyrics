@@ -455,13 +455,15 @@ if "hide_buttons" not in st.session_state:
 def apply_theme(selected_theme):
     css = f"""
     <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
     .stApp > header {{
         background-color: transparent;
     }}
     .stApp {{
         background: {selected_theme['background_color']};
         color: {selected_theme["text_color"]};
-        font-family: "Helvetica", "Arial", sans-serif;
+        font-family: 'Outfit', sans-serif;
     }}
     button[data-baseweb="tab"] {{
         background-color: transparent !important;
@@ -483,15 +485,18 @@ def apply_theme(selected_theme):
         color: {selected_theme["text_color"]};
         -webkit-text-fill-color: {selected_theme["text_color"]} !important;
         font-weight: 600 !important;
+        font-family: 'Outfit', sans-serif;
     }}
     p, ul, li {{
         color: {selected_theme["text_color"]};
         font-weight: 600 !important;
         font-size: large !important;
+        font-family: 'Outfit', sans-serif;
     }}
     h3, h2, h1, strong, .lyrics, h4 {{
         color: {selected_theme["text_color"]};
         font-weight: 900 !important;
+        font-family: 'Outfit', sans-serif;
     }}
     .lyrics {{
         font-size: 20px;
@@ -499,15 +504,18 @@ def apply_theme(selected_theme):
     [data-baseweb="tag"] {{
         background: {selected_theme['button_color']} !important;
         color: {selected_theme["text_color"]};
+        font-family: 'Outfit', sans-serif;
     }}
     th {{
         color: {selected_theme["text_color"]} !important;
         font-weight: 900 !important;
         text-align: left !important;
+        font-family: 'Outfit', sans-serif;
     }}
     td {{
         color: {selected_theme["text_color"]} !important;
         font-weight: 600 !important;
+        font-family: 'Outfit', sans-serif;
     }}
     </style>
     """
