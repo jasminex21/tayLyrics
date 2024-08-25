@@ -107,7 +107,7 @@ THEME_CSS = {
 ### PAGE CONFIG
 st.set_page_config(layout='wide',
                    page_title="tayLyrics",
-                   page_icon=":sparkles:",
+                   page_icon="./favicon.png",
                    initial_sidebar_state="collapsed",
                    menu_items={'About': "#### tayLyrics: A lyrics guessing game for Swifties"})
 
@@ -514,8 +514,10 @@ with main_col:
         start_tab, past_stats_tab, leaderboard_tab = st.tabs(["Start New Game", "Past Game Statistics", "Leaderboard"])
 
         with start_tab: 
-
-            with st.expander(":pencil2: Instructions (click to expand)", expanded=False): 
+            exp = st.expander(":pencil2: Instructions (click to expand)", expanded=False)
+            b1, c, b2 = exp.columns(3)
+            with exp:
+                c.image("./logo_cropped.png")
                 st.markdown(f"Lyrics range from debut to *{ALL_ALBUMS[-1]}*. All Taylor's Version vault tracks are included!")
                 st.markdown(f"Capitalization and minor spelling errors do NOT matter!")
                 st.markdown("### IMPORTANT GUIDELINES:")
