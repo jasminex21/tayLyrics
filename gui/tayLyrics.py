@@ -392,10 +392,11 @@ def hint():
     st.session_state.points -= 1
     remainder = ""
 
-    if (st.session_state.game_mode == f"Survival (with 5 lives, {HINTS_LIMIT} hints)") and (st.session_state.hints_used == st.session_state.hints_limit):
-        st.session_state.disable_hint_btn = True
-        st.session_state.hint_feedback += f"\n\n:orange[WARNING: The following is Hint {st.session_state.hints_limit} and the last hint for this game! You can earn another hint if you reach Round {round(st.session_state.round_count + 6, -1)}.]\n\n"
-        remainder = f" ({st.session_state.hints_limit - st.session_state.hints_used} remaining) "
+    if (st.session_state.game_mode == f"Survival (with 5 lives, {HINTS_LIMIT} hints)"):
+        remainder = f" ({st.session_state.hints_limit - st.session_state.hints_used} remaining) " 
+        if (st.session_state.hints_used == st.session_state.hints_limit):
+            st.session_state.disable_hint_btn = True
+            st.session_state.hint_feedback += f"\n\n:orange[WARNING: The following is Hint {st.session_state.hints_limit} and the last hint for this game! You can earn another hint if you reach Round {round(st.session_state.round_count + 6, -1)}.]\n\n"
 
     if st.session_state.hints == 1: 
         st.session_state.hint_feedback += f"Hint 1{remainder}: this song comes from the album **{st.session_state.correct_album}**"
