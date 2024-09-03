@@ -112,6 +112,19 @@ st.set_page_config(layout='wide',
                    initial_sidebar_state="collapsed",
                    menu_items={'About': "#### tayLyrics: A lyrics guessing game for Swifties"})
 
+analytics_html = f"""
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-K4HND1RYQV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){{dataLayer.push(arguments);}}
+  gtag('js', new Date());
+
+  gtag('config', 'G-K4HND1RYQV');
+</script>
+"""
+st.markdown(analytics_html, unsafe_allow_html=True)
+
 ### SESSION STATES ###
 if "game_in_progress" not in st.session_state: 
     st.session_state.game_in_progress = False
