@@ -1,6 +1,7 @@
 import os
 import streamlit as st
 import pandas as pd
+import extra_streamlit_components as stx
 from time import strftime, gmtime
 
 from servertools.Lyrics import Lyrics
@@ -112,19 +113,6 @@ st.set_page_config(layout='wide',
                    initial_sidebar_state="collapsed",
                    menu_items={'About': "#### tayLyrics: A lyrics guessing game for Swifties"})
 
-analytics_html = f"""
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-K4HND1RYQV"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){{dataLayer.push(arguments);}}
-  gtag('js', new Date());
-
-  gtag('config', 'G-K4HND1RYQV');
-</script>
-"""
-st.markdown(analytics_html, unsafe_allow_html=True)
-
 ### SESSION STATES ###
 if "game_in_progress" not in st.session_state: 
     st.session_state.game_in_progress = False
@@ -202,6 +190,24 @@ if "hints_limit" not in st.session_state:
     st.session_state.hints_limit = HINTS_LIMIT
 
 ### FUNCTIONS ###
+import streamlit.components.v1 as components
+
+def inject_google_analytics():
+
+    analytics_html = """
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-K4HND1RYQV"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){{dataLayer.push(arguments);}}
+      gtag('js', new Date());
+
+      gtag('config', 'G-K4HND1RYQV');
+    </script>
+    """
+
+    components.html(analytics_html)
+
 def apply_theme(selected_theme):
     css = f"""
     <style>
@@ -514,6 +520,8 @@ def get_database(path="leaderboard.db"):
         return f.read()
 
 ### UI ###
+inject_google_analytics()
+
 with st.sidebar:
     with st.expander(":frame_with_picture: Themes", expanded=True):
         st.radio("Select a theme", 
