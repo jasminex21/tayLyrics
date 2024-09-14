@@ -520,8 +520,6 @@ def get_database(path="leaderboard.db"):
         return f.read()
 
 ### UI ###
-inject_google_analytics()
-
 with st.sidebar:
     with st.expander(":frame_with_picture: Themes", expanded=True):
         st.radio("Select a theme", 
@@ -705,3 +703,4 @@ with main_col:
                 st.markdown(f"* :moneybag: Total points: {st.session_state.points}")
                 if st.session_state.game_mode == f"Survival (with 5 lives, {HINTS_LIMIT} hints)":
                     st.markdown(f"* :space_invader: Lives: {st.session_state.lives}")
+inject_google_analytics()
