@@ -105,6 +105,13 @@ THEME_CSS = {
         "button_color": "#7D776E",
         "inputs": "#9A9181",
         "text_color": "black"}}
+ACCEPTABLE_ANSWERS = {"Mary's Song (Oh My My My)": ["Mary's Song"],
+                      "Come Back...Be Here (Taylor’s Version)": ["Come Back Be Here", "Come Back ... Be Here"],
+                      "Slut! (Taylor's Version) (From The Vault)": ["Slut"],
+                      "...Ready For It?": ["Ready For It?"],
+                      "ME!": ["ME"],
+                      "Question...?": ["Question"],
+                      "I Can Fix Him (No Really I Can)": ["I Can Fix Him"]}
 
 ### PAGE CONFIG
 st.set_page_config(layout='wide',

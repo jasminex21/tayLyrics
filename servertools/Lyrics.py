@@ -125,6 +125,7 @@ class Lyrics():
         return self.data["element"][self.rand_num]
     
     def get_guess_feedback(self, guess: str, 
+                           acceptable_answers: Optional[dict]=None,
                            remove_parentheses: Optional[bool]=False, 
                            keep_parentheses: Optional[List]=None) -> bool: 
         """
@@ -135,6 +136,11 @@ class Lyrics():
         Args: 
             guess: 
                 The user's guess as a string
+            
+            acceptable_answers: 
+                Optional parameter, formatted as a dict where the correct song is
+                the key and the value is a list of acceptable answers, used to 
+                specify acceptable answers for given songs
 
             remove_parentheses: 
                 Optional parameter used to specify whether to remove parentheses
@@ -152,6 +158,8 @@ class Lyrics():
             A boolean; True if the guess is "correct," False otherwise.
         """
         correct_song = self.get_track_name()
+        # other accepted answers - e.g. just "Gladiator" is accepted for Gladiator (Interlude)
+        accepted_songs = acceptable_answers[correct_song] if correct_song in acceptable_answers else []
         # exceptions where the parentheses should be included in the guess
         if remove_parentheses:
             if correct_song not in keep_parentheses:
@@ -159,8 +167,9 @@ class Lyrics():
                 correct_song = re.sub(r"\([^)]*\)", "", correct_song).strip()
         guess = guess.strip()
         # allowing for minor typos
-        track_name_length = len(correct_song)
-        allowed_diff = math.ceil(track_name_length * 0.33)
-        if stringdist.levenshtein(guess.lower(), correct_song.lower()) <= allowed_diff: 
-            return True
+        for accepted in [correct_song] + accepted_songs: 
+            track_name_length = len(accepted)
+            allowed_diff = math.ceil(track_name_length * 0.33)
+            if stringdist.levenshtein(guess.lower(), accepted.lower()) <= allowed_diff: 
+                return True
         return False
