@@ -190,24 +190,6 @@ if "hints_limit" not in st.session_state:
     st.session_state.hints_limit = HINTS_LIMIT
 
 ### FUNCTIONS ###
-import streamlit.components.v1 as components
-
-def inject_google_analytics():
-
-    analytics_html = """
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-K4HND1RYQV"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){{dataLayer.push(arguments);}}
-      gtag('js', new Date());
-
-      gtag('config', 'G-K4HND1RYQV');
-    </script>
-    """
-
-    components.html(analytics_html)
-
 def apply_theme(selected_theme):
     css = f"""
     <style>
@@ -703,4 +685,3 @@ with main_col:
                 st.markdown(f"* :moneybag: Total points: {st.session_state.points}")
                 if st.session_state.game_mode == f"Survival (with 5 lives, {HINTS_LIMIT} hints)":
                     st.markdown(f"* :space_invader: Lives: {st.session_state.lives}")
-inject_google_analytics()
