@@ -38,6 +38,10 @@ class Lyrics():
         track_name = self.data["track_name"][self.rand_num]
 
         if mode == "Hard (1 line)": 
+            # regenerate the random number if the lyric is less than 3 words
+            while len(self.data["lyric"][self.rand_num].split(" ")) < 3:
+                self.rand_num = random.randint(0, self.data.shape[0] - 1)
+
             self.start_line = self.rand_num
             self.end_line = self.rand_num
             return self.data["lyric"][self.rand_num]
@@ -159,7 +163,7 @@ class Lyrics():
         """
         correct_song = self.get_track_name()
         # other accepted answers - e.g. just "Gladiator" is accepted for Gladiator (Interlude)
-        accepted_songs = acceptable_answers[correct_song] if correct_song in acceptable_answers else []
+        accepted_songs = acceptable_answers[correct_song] if (acceptable_answers) and (correct_song in acceptable_answers) else []
         # exceptions where the parentheses should be included in the guess
         if remove_parentheses:
             if correct_song not in keep_parentheses:

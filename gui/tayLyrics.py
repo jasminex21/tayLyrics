@@ -1,8 +1,8 @@
 import os
 import streamlit as st
 import pandas as pd
-import extra_streamlit_components as stx
-from time import strftime, gmtime
+from datetime import datetime
+import pytz
 
 from servertools.Lyrics import Lyrics
 from servertools.Leaderboard import Leaderboards
@@ -474,7 +474,11 @@ def end_game():
 def name_submitted():
     
     st.session_state.disable_name_input = True
-    st.session_state.submitted_datetime = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+    # st.session_state.submitted_datetime = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+    utc_time = datetime.utcnow()
+    eastern = pytz.timezone("US/Eastern")
+    eastern_time = utc_time.replace(tzinfo=pytz.utc).astimezone(eastern)
+    st.session_state.submitted_datetime = eastern_time.strftime("%Y-%m-%d %H:%M:%S")
 
     game_results = (st.session_state.leaderboard_name,
                     st.session_state.points,
@@ -490,7 +494,7 @@ def name_submitted():
         current_leaderboards = leaderboard.get_leaderboards()
 
     added_to_df = current_leaderboards[st.session_state.difficulty]
-    filtered_row = added_to_df[added_to_df["Datetime (UTC)"].astype(str) == str(st.session_state.submitted_datetime)]
+    filtered_row = added_to_df[added_to_df["Datetime (EST)"].astype(str) == str(st.session_state.submitted_datetime)]
     added_rank = int(filtered_row.index[0])
     out_of = added_to_df.shape[0]
 
@@ -499,7 +503,7 @@ def name_submitted():
 
 def highlight_new_row(row):
     """Highlights the row that was just added to the leaderboard in green"""
-    if str(row["Datetime (UTC)"]) == str(st.session_state.submitted_datetime):
+    if str(row["Datetime (EST)"]) == str(st.session_state.submitted_datetime):
         return ['background-color: #4D6D4D'] * len(row)
     else:
         return [''] * len(row)
@@ -644,6 +648,7 @@ with main_col:
                             disabled=st.session_state.disable_buttons)
                 if st.session_state.guess: 
                     if st.session_state.lyrics.get_guess_feedback(st.session_state.guess,
+                                                                  acceptable_answers=ACCEPTABLE_ANSWERS,
                                                                   remove_parentheses=True,
                                                                   keep_parentheses=KEEP_PARENTHESES): 
                         answered_correctly()
