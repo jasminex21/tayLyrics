@@ -541,7 +541,7 @@ with main_col:
     st.title("Welcome to :sparkles:tayLyrics:sparkles:!")
     if st.session_state.game_in_progress == False: 
 
-        start_tab, past_stats_tab, leaderboard_tab = st.tabs(["Start New Game", "Past Game Statistics", "Leaderboard"])
+        start_tab, past_stats_tab, leaderboard_tab = st.tabs(["Start New Game", "Stats", "Leaderboard"])
 
         with start_tab: 
             exp = st.expander(":pencil2: Instructions (click to expand)", expanded=False)
