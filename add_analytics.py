@@ -1,32 +1,39 @@
+import os
 from bs4 import BeautifulSoup
 import pathlib
 import shutil
 import streamlit as st
-import os
 
-GA_ID = os.getenv("GA_ID", "G-XXXXXXXXXX") 
+# Get multiple GA IDs, comma-separated (e.g., "G-MAIN,G-SUBAPP1")
+GA_IDS = os.getenv("GA_IDS", "G-XXXXXXXXXX").split(',')
 
-GA_SCRIPT = f"""
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id={GA_ID}"></script>
-<script id='google_analytics'>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){{dataLayer.push(arguments);}}
-  gtag('js', new Date());
-  gtag('config', '{GA_ID}');
-</script>
-"""
+GA_SCRIPTS = "\n".join([
+    f"""
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id={ga_id}"></script>
+    <script id='google_analytics_{ga_id}'>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){{dataLayer.push(arguments);}}
+      gtag('js', new Date());
+      gtag('config', '{ga_id}');
+    </script>
+    """
+    for ga_id in GA_IDS
+])
 
 def inject_ga():
     index_path = pathlib.Path(st.__file__).parent / "static" / "index.html"
     soup = BeautifulSoup(index_path.read_text(), features="html.parser")
-    if not soup.find(id="google_analytics"): 
+    
+    # Check if the scripts are already injected
+    if not any(soup.find(id=f"google_analytics_{ga_id}") for ga_id in GA_IDS):
         bck_index = index_path.with_suffix('.bck')
         if bck_index.exists():
-            shutil.copy(bck_index, index_path)  
+            shutil.copy(bck_index, index_path)
         else:
-            shutil.copy(index_path, bck_index)  
-        new_html = str(soup).replace('<head>', '<head>\n' + GA_SCRIPT)
+            shutil.copy(index_path, bck_index)
+        
+        new_html = str(soup).replace('<head>', '<head>\n' + GA_SCRIPTS)
         index_path.write_text(new_html)
 
 inject_ga()
