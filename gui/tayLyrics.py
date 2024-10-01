@@ -371,6 +371,7 @@ def answered_correctly():
     correct_album_short = ALBUMS_MAPPING[st.session_state.correct_album]
     st.session_state.album_counter[correct_album_short].append(True)
     st.session_state.hide_buttons = True
+    st.session_state.hint_feedback = ""
 
 def answered_incorrectly():
     st.session_state.points -= 1
@@ -416,6 +417,7 @@ def hint():
 
 def giveup():
     st.session_state.incorrect_feedback = ""
+    st.session_state.hint_feedback = ""
     st.session_state.disable_buttons = True
     st.session_state.disable_hint_btn = True
     st.session_state.points -= 2
@@ -541,6 +543,7 @@ with main_col:
     st.title("Welcome to :sparkles:tayLyrics:sparkles:!")
     st.markdown(f'#### **More artist games at <a href="https://www.lyriguessr.xyz/" target="_blank">lyriguessr!</a> (opens external link)**', 
                 unsafe_allow_html=True)
+    st.markdown(f"*Similar artists: Olivia Rodrigo, Sabrina Carpenter*")
     if st.session_state.game_in_progress == False: 
 
         start_tab, past_stats_tab, leaderboard_tab = st.tabs(["Start New Game", "Stats", "Leaderboard"])
@@ -678,7 +681,7 @@ with main_col:
                     st.button(":arrow_right: Next round", on_click=new_round)
                 
                 col1, col2, col4 = st.columns(3)
-                col4.button(":octagonal_sign: End current game", on_click=end_game, key="end_game")
+                col4.button(":octagonal_sign: END CURRENT GAME", on_click=end_game, key="end_game")
 
             with stats_tab:
                 st.markdown(f"### In-Game Statistics")
