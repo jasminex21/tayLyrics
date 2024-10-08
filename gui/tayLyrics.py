@@ -553,9 +553,6 @@ with main_col:
             b1, c, b2 = exp.columns(3)
             with exp:
                 c.image("./logo_cropped.png")
-                st.markdown(f"Earn points by guessing the song that the generated lyric(s) comes from.")
-                st.markdown(f"If you don’t have a guess... ")
-                st.markdown(f"* ask for a hint (-1 point) - there are 3 available per round, and you start with {HINTS_LIMIT} available per game. You earn one extra hint for each 10 rounds you reach!\n* give up (-2 points)")
                 st.markdown(f"Lyrics range from debut to *{ALL_ALBUMS[-1]}*. All Taylor's Version vault tracks are included!")
                 st.markdown("*Hits Different*, *You're Losing Me*, *All of the Girls You Loved Before*, and *If This Was a Movie* <u>are</u> included.", unsafe_allow_html=True)
                 st.markdown("### IMPORTANT GUIDELINES:")
