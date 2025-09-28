@@ -1,0 +1,11 @@
+[client]
+showErrorDetails = false
+
+[theme]
+base="dark"
+
+[server]
+port = 10000  # Render's internal port
+address = "0.0.0.0"
+headless = true
+enableCORS = false
