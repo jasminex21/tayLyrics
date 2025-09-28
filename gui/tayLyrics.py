@@ -241,7 +241,10 @@ def apply_theme(selected_theme):
     h3, h2, h1, strong, .lyrics, h4 {{
         color: {selected_theme["text_color"]};
         font-weight: 900 !important;
-        font-family: 'Outfit', sans-serif;
+        font-family: 'Outfit', sans-serif !important;
+    }}
+    .stAppToolbar, summary, ul {{
+        background-color: {selected_theme['background_color']} !important;
     }}
     .lyrics {{
         font-size: 20px;
@@ -516,7 +519,7 @@ def get_database(path="leaderboard.db"):
 
 ### UI ###
 with st.sidebar:
-    with st.expander(":frame_with_picture: Themes", expanded=True):
+    with st.expander("🖼️ Themes", expanded=True):
         st.radio("Select a theme", 
                 options=ALL_ALBUMS_SHORT,
                 index=ALL_ALBUMS_SHORT.index("Midnights"),
@@ -574,7 +577,7 @@ with main_col:
                                 options=ALL_ALBUMS_SHORT,
                                 default=st.session_state.albums if st.session_state.albums else ALL_ALBUMS_SHORT,
                                 key="albums0")
-                started = st.form_submit_button(":large_green_square: Start new game")
+                started = st.form_submit_button("🟩 Start new game")
 
             if started: 
                 st.session_state.difficulty = st.session_state.difficulty0
@@ -678,12 +681,12 @@ with main_col:
                     st.button(":arrow_right: Next round", on_click=new_round)
                 
                 col1, col2, col4 = st.columns(3)
-                col4.button(":octagonal_sign: END CURRENT GAME", on_click=end_game, key="end_game")
+                col4.button("🛑 END CURRENT GAME", on_click=end_game, key="end_game")
 
             with stats_tab:
                 st.markdown(f"### In-Game Statistics")
                 st.markdown(f"**{DIFFICULTY_MAPPING[st.session_state.difficulty]} difficulty, {MODE_MAPPING[st.session_state.game_mode]} mode**")
-                st.markdown(f"* :large_green_circle: Round: {st.session_state.round_count}")
+                st.markdown(f"* 🟢 Round: {st.session_state.round_count}")
 
                 accuracy_pct = round((sum(st.session_state.round_results) * 100 /st.session_state.round_count), 2)
                 possible_pct = round(st.session_state.points * 100 / (st.session_state.round_count * POINTS_MAPPING[st.session_state.difficulty]), 2)
