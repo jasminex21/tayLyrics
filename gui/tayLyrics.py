@@ -544,9 +544,10 @@ with st.sidebar:
 buffer1, main_col, buffer2 = st.columns([1, 3, 1])
 with main_col:
     st.title("Welcome to :sparkles:tayLyrics:sparkles:!")
-    st.markdown(f'#### **More artist games at <a href="https://www.lyriguessr.xyz/" target="_blank">lyriguessr!</a> (opens external link)**', 
-                unsafe_allow_html=True)
-    st.markdown(f"*Similar artists: Olivia Rodrigo, Sabrina Carpenter*")
+    # st.markdown(f'#### **More artist games at <a href="https://www.lyriguessr.xyz/" target="_blank">lyriguessr!</a> (opens external link)**', 
+    #             unsafe_allow_html=True)
+    # st.markdown(f"*Similar artists: Olivia Rodrigo, Sabrina Carpenter*")
+    st.markdown(f"*The Life of a Showgirl lyrics will be added as soon as they are available :)*")
     if st.session_state.game_in_progress == False: 
 
         start_tab, past_stats_tab, leaderboard_tab = st.tabs(["Start New Game", "Stats", "Leaderboard"])
