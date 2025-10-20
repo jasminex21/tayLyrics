@@ -8,7 +8,7 @@ from servertools.Lyrics import Lyrics
 from servertools.Leaderboard import Leaderboards
 
 ### GLOBAL VARS ###
-ALL_LYRICS = pd.read_csv("./TAYLOR_LYRICS_JUN2024.csv")
+ALL_LYRICS = pd.read_csv("./TAYLOR_LYRICS_OCT2025.csv")
 ALL_ALBUMS = ["Taylor Swift", 
               "Fearless (Taylor's Version)",
               "Speak Now (Taylor's Version)", 
@@ -19,7 +19,8 @@ ALL_ALBUMS = ["Taylor Swift",
               "folklore", 
               "evermore", 
               "Midnights", 
-              "THE TORTURED POETS DEPARTMENT"]
+              "THE TORTURED POETS DEPARTMENT", 
+              "The Life of a Showgirl"]
 KEEP_PARENTHESES =  ["Mary's Song (Oh My My My)", 
                      "I Can Fix Him (No Really I Can)"]
 DIFFICULTIES = ["Easy (an entire section, e.g. chorus)", 
@@ -44,7 +45,8 @@ ALL_ALBUMS_SHORT = ["Debut",
                     "folklore",
                     "evermore",
                     "Midnights",
-                    "TTPD"]
+                    "TTPD", 
+                    "Showgirl"]
 MODE_MAPPING = {f"Survival (with 5 lives, {HINTS_LIMIT} hints)": "Survival",
                 "Casual (unlimited lives and hints)": "Casual"}
 ALBUMS_MAPPING = {long:short for long, short in zip(ALL_ALBUMS, ALL_ALBUMS_SHORT)}
@@ -104,6 +106,11 @@ THEME_CSS = {
         "background_color": "#a79e8f",
         "button_color": "#7D776E",
         "inputs": "#9A9181",
+        "text_color": "black"},
+    "Showgirl": {
+        "background_color": "#5eb298",
+        "button_color": "#E7975A",
+        "inputs": "#98E2C6",
         "text_color": "black"}}
 ACCEPTABLE_ANSWERS = {"Mary's Song (Oh My My My)": ["Mary's Song"],
                       "Come Back...Be Here (Taylor’s Version)": ["Come Back Be Here", "Come Back ... Be Here"],
@@ -547,7 +554,7 @@ with main_col:
     # st.markdown(f'#### **More artist games at <a href="https://www.lyriguessr.xyz/" target="_blank">lyriguessr!</a> (opens external link)**', 
     #             unsafe_allow_html=True)
     # st.markdown(f"*Similar artists: Olivia Rodrigo, Sabrina Carpenter*")
-    st.markdown(f"*The Life of a Showgirl lyrics will be added as soon as they are available :)*")
+    # st.markdown(f"*The Life of a Showgirl lyrics will be added as soon as they are available :)*")
     if st.session_state.game_in_progress == False: 
 
         start_tab, past_stats_tab, leaderboard_tab = st.tabs(["Start New Game", "Stats", "Leaderboard"])
